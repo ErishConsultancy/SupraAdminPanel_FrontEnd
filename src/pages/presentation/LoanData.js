@@ -31,6 +31,7 @@ import OffCanvas, {
 	OffCanvasHeader,
 	OffCanvasTitle,
 } from '../../components/bootstrap/OffCanvas';
+import Checks from '../../components/bootstrap/forms/Checks';
 
 const LoanData = () => {
 	const authToken = localStorage.getItem('token');
@@ -39,14 +40,21 @@ const LoanData = () => {
 	const [sortOrder, setSortOrder] = useState('asc');
 	// const [searchQuery, setSearchQuery] = useState('');
 	const [modalStatus1, setModalStatus1] = useState(false);
+	const [modalStatus2, setModalStatus2] = useState(false);
+
 	const [reason, setReason] = useState(''); // Renamed to reason for consistency
 	const [errorMessage, setErrorMessage] = useState({ reason: '' });
 	const [rejectLoanId, setRejectLoanId] = useState(null);
+	const [ApproveLoanId, setApproveLoanId] = useState(null);
+
 	const [rejectLoanDoc, setRejectLoanDoc] = useState(null);
 	const [rejectLoanDocStatus, setRejectLoanDocStatus] = useState(null);
 	const [CustomerAttachData, setCustomerAttachData] = useState(null);
+	const [selectedUsers, setSelectedUsers] = useState([]);
+	const [isChecked, setIsChecked] = useState(false); // State for checkbox
 
 	const navigate = useNavigate();
+
 
 	console.log(rejectLoanId, 'rejectLoanId');
 	const fetchUserData = useCallback(async () => {
@@ -95,6 +103,7 @@ const LoanData = () => {
 			if (!response.ok) {
 				throw new Error('Network response was not ok');
 			}
+			setModalStatus2(false);
 
 			fetchUserData();
 		} catch (error) {
@@ -152,11 +161,11 @@ const LoanData = () => {
 
 	const { themeStatus } = useDarkMode();
 
-	const handleApproveClick = (id) => {
-		if (window.confirm('Are you sure you want to Approve this record?')) {
-			fetchApproveLoanAPI(id);
-		}
-	};
+	// const handleApproveClick = (id) => {
+	// 	if (window.confirm('Are you sure you want to Approve this record?')) {
+	// 		fetchApproveLoanAPI(id);
+	// 	}
+	// };
 
 	const getStatusClass = (status) => {
 		switch (status) {
@@ -357,6 +366,7 @@ const LoanData = () => {
 			}
 
 			const data = await response.json();
+			console.log(data, "data")
 			setCustomerAttachData(data);
 		} catch (error) {
 			console.error('There was a problem with the fetch operation:', error);
@@ -364,9 +374,24 @@ const LoanData = () => {
 	}, [rejectLoanId]);
 	useEffect(() => {
 		fetchCustomerAttachment();
-	}, []);
+	}, [fetchCustomerAttachment]);
 	console.log(rejectLoanId, 'rejectLoanId');
 	console.log(CustomerAttachData, 'setCustomerAttachData');
+
+	const handleCheckboxChange = (e) => {
+		setIsChecked(e.target.checked);
+	};
+
+	// Function to handle loan approval
+	const handleSubmitApproveLoans = () => {
+		if (isChecked) {
+			// Proceed with approving the loan if checkbox is checked
+			fetchApproveLoanAPI(ApproveLoanId);
+		} else {
+			// Show error or prevent action if checkbox is not checked
+			alert("You must check the box to approve the loan.");
+		}
+	};
 
 	return (
 		<PageWrapper>
@@ -475,8 +500,9 @@ const LoanData = () => {
 													<DropdownMenu isAlignmentEnd>
 														<DropdownItem>
 															<Button
-																onClick={() =>
-																	handleApproveClick(item.id)
+																onClick={() => { setApproveLoanId(item.id); 
+																	setModalStatus2(true);}
+																	// handleApproveClick(item.id)
 																}>
 																Approve
 															</Button>
@@ -600,6 +626,40 @@ const LoanData = () => {
 						</Button>
 					</ModalBody>
 				</Modal>
+
+				<Modal
+					isOpen={modalStatus2}
+					onClose={() => setModalStatus2(false)}
+					setIsOpen={setModalStatus2}>
+					<ModalHeader setIsOpen={setModalStatus2}>
+						<ModalTitle id='new-todo-modal'>Approve Loan</ModalTitle>
+					</ModalHeader>
+					<ModalBody className='Approve-loan-body'>
+					<h2>Are you sure you want to approve this loan?</h2>
+<div className='check-div'>
+						<Checks
+						type="checkbox"
+						checked={isChecked}
+						onChange={handleCheckboxChange}
+						className="check-css"
+					/>
+
+					<label> Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+
+</label>
+</div>
+						
+
+						<Button
+							type='button'
+							onClick={() => handleSubmitApproveLoans(ApproveLoanId)}
+							className='reject-button'>
+							Submit
+						</Button>
+					</ModalBody>
+				</Modal>
+
+
 				<OffCanvas
 					id='notificationCanvas'
 					titleId='offcanvasExampleLabel'

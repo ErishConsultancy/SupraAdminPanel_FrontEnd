@@ -53,6 +53,7 @@ const Login = () => {
         localStorage.setItem('token', data?.message?.token);
         localStorage.setItem('fname', data?.message?.fname);
         localStorage.setItem('lname', data?.message?.lname);
+        localStorage.setItem('ErishLogin', data?.message?.erishLogin);
 
         document.cookie = `token=${data?.message?.token}; path=/;`;
 
@@ -83,6 +84,7 @@ const Login = () => {
         body: JSON.stringify({ otp }),
       });
       const data = await response.json();
+      console.log(data, "Login Data")
       if (response.ok) {
         setUser(data);
         // navigate('/');

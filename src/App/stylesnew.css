@@ -252,3 +252,44 @@ margin-bottom: 5px;
     color: #fff;
     font-weight: 600;
 }
+.Approve-loan-body{
+    margin: 0;
+    padding: 0px 15px !important;
+}
+.Approve-loan-body h2{
+    font-size: 18px;
+    padding-bottom: 15px;
+    padding-top: 0px;
+    /* border-bottom: 1px solid #ccc; */
+    display: inline-block;
+    
+    /* width: 90%;
+    padding: 0px 0px 0px 15px; */
+}
+.check-div{
+    width: 100%;
+    display: inline-block;
+}
+.check-div .form-check{
+    display: inline-block !important;
+    vertical-align: top;
+}
+.check-div .form-check-input{
+    width: 20px;
+    min-width: 20px !important;
+    max-width: 20px !important;
+    padding: 0px !important;
+    height: 20px !important
+}
+.check-div label{
+    display: inline-block;
+    width: 90%;
+    padding: 0px 15px;
+    text-align: justify;
+    margin-bottom: 10px;
+    color: "#0f0f0f";
+}
+.modal-header{
+    border-bottom: 1px solid #ccc;
+    margin-bottom: 15px;
+}
