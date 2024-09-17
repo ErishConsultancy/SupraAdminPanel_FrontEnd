@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import DatePicker from 'react-datepicker';
 import Card, {
@@ -21,6 +21,7 @@ import Input from '../../components/bootstrap/forms/Input';
 
 const EditLoans = () => {
 	const { id } = useParams();
+	const navigate = useNavigate();
 
 	const [loanAmount, setLoanAmount] = useState('');
 	const [LoanId, setLoanId] = useState('');
@@ -189,6 +190,34 @@ const EditLoans = () => {
 		setPan(selectedPan);
 		console.log(selectedPan, 'pan');
 	};
+
+	const timeoutDuration = 60 * 60 * 1000; // 1 Hour
+  let timeout;
+  useEffect(() => {
+    if (!authToken) {
+      navigate('/auth-pages/login');
+    }
+  }, [authToken, navigate]);
+
+  const logout = () => {
+    localStorage.removeItem('token');
+    navigate('/auth-pages/login');
+  };
+  const resetTimeout = () => {
+    clearTimeout(timeout);
+    timeout = setTimeout(logout, timeoutDuration);
+  };
+
+  useEffect(() => {
+    window.addEventListener('mousemove', resetTimeout);
+    window.addEventListener('keypress', resetTimeout);
+    timeout = setTimeout(logout, timeoutDuration);
+    return () => {
+      window.removeEventListener('mousemove', resetTimeout);
+      window.removeEventListener('keypress', resetTimeout);
+      clearTimeout(timeout);
+    };
+  }, []);
 
 	return (
 		<PageWrapper>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import PageWrapper from '../../layout/PageWrapper/PageWrapper';
 import Page from '../../layout/Page/Page';
 import Card, {
@@ -18,6 +18,7 @@ import User1Img from '../../assets/img/wanna/wanna2.png';
 const UserListPage = () => {
 	const authToken = localStorage.getItem("token");
 	const baseUrl = process.env.REACT_APP_BASE_URL;
+	const navigate = useNavigate();
 
 	const [userData, setUserData] = useState(null);
 
@@ -72,8 +73,34 @@ const UserListPage = () => {
 			fetchDeleteAPI(id);
 		}
 	};
-	console.log(userData, "userData 1050")
-
+	// console.log(userData, "userData 1050")
+	const timeoutDuration = 60 * 60 * 1000; // 1 Hour
+	let timeout;
+	useEffect(() => {
+	  if (!authToken) {
+		navigate('/auth-pages/login');
+	  }
+	}, [authToken, navigate]);
+  
+	const logout = () => {
+	  localStorage.removeItem('token');
+	  navigate('/auth-pages/login');
+	};
+	const resetTimeout = () => {
+	  clearTimeout(timeout);
+	  timeout = setTimeout(logout, timeoutDuration);
+	};
+  
+	useEffect(() => {
+	  window.addEventListener('mousemove', resetTimeout);
+	  window.addEventListener('keypress', resetTimeout);
+	  timeout = setTimeout(logout, timeoutDuration);
+	  return () => {
+		window.removeEventListener('mousemove', resetTimeout);
+		window.removeEventListener('keypress', resetTimeout);
+		clearTimeout(timeout);
+	  };
+	}, []);
 
 	return (
 		<PageWrapper>

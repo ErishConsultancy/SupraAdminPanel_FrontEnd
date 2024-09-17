@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import Card, { CardBody, CardFooter, CardFooterRight } from '../../components/bootstrap/Card';
 import Button from '../../components/bootstrap/Button';
@@ -19,6 +19,7 @@ const EditUser = () => {
     const [Email, setEmail] = useState('');
     const [designation, setDesignation] = useState('');
     const [userData, setUserData] = useState(null);
+	const navigate = useNavigate();
 
     const authToken = localStorage.getItem('token');
 
@@ -92,6 +93,34 @@ console.log(userData, "userData");
         }
     };
 
+    const timeoutDuration = 60 * 60 * 1000; // 1 Hour
+  let timeout;
+  useEffect(() => {
+    if (!authToken) {
+      navigate('/auth-pages/login');
+    }
+  }, [authToken, navigate]);
+
+  const logout = () => {
+    localStorage.removeItem('token');
+    navigate('/auth-pages/login');
+  };
+  const resetTimeout = () => {
+    clearTimeout(timeout);
+    timeout = setTimeout(logout, timeoutDuration);
+  };
+
+  useEffect(() => {
+    window.addEventListener('mousemove', resetTimeout);
+    window.addEventListener('keypress', resetTimeout);
+    timeout = setTimeout(logout, timeoutDuration);
+    return () => {
+      window.removeEventListener('mousemove', resetTimeout);
+      window.removeEventListener('keypress', resetTimeout);
+      clearTimeout(timeout);
+    };
+  }, []);
+  
     return (
         <PageWrapper>
             <Page>

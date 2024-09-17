@@ -170,10 +170,12 @@ const presentation: RouteProps[] = [
 		path: dashboardPagesMenu.dashboard.path,
 		element: <LANDING.DASHBOARD />,
 	},
+	...(dashboardPagesMenu.Customer ? [
 	{
 		path: dashboardPagesMenu.Customer.path,
 		element: <LANDING.Customer />,
 	},
+] : []),
 	{
 		path: dashboardPagesMenu.userlist.path,
 		element: <LANDING.UserList />,
@@ -190,10 +192,12 @@ const presentation: RouteProps[] = [
 		path: dashboardPagesMenu.SendMessage.path,
 		element: <LANDING.SendMessage />,
 	},
-	{
-		path: dashboardPagesMenu.nbfclist.path,
-		element: <LANDING.NBFCList />,
-	},
+	...(dashboardPagesMenu.nbfclist ? [
+        {
+            path: dashboardPagesMenu.nbfclist.path,
+            element: <LANDING.NBFCList />,
+        },
+    ] : []),
 	{
 		path: dashboardPagesMenu.userprofile.path,
 		element: <LANDING.UserProfile />,

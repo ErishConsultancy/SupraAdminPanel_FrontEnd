@@ -133,7 +133,36 @@ const EditPreApproveLoan = () => {
 			fetchUserData(selectedUserId);
 		}
 	}, [selectedUserId, fetchUserData]);
-console.log(CustometIDData, "CustometIDData")
+// console.log(CustometIDData, "CustometIDData")
+
+
+const timeoutDuration = 60 * 60 * 1000; // 1 Hour
+  let timeout;
+  useEffect(() => {
+    if (!authToken) {
+      navigate('/auth-pages/login');
+    }
+  }, [authToken, navigate]);
+
+  const logout = () => {
+    localStorage.removeItem('token');
+    navigate('/auth-pages/login');
+  };
+  const resetTimeout = () => {
+    clearTimeout(timeout);
+    timeout = setTimeout(logout, timeoutDuration);
+  };
+
+  useEffect(() => {
+    window.addEventListener('mousemove', resetTimeout);
+    window.addEventListener('keypress', resetTimeout);
+    timeout = setTimeout(logout, timeoutDuration);
+    return () => {
+      window.removeEventListener('mousemove', resetTimeout);
+      window.removeEventListener('keypress', resetTimeout);
+      clearTimeout(timeout);
+    };
+  }, []);
     return (
         <PageWrapper>
             <Page>

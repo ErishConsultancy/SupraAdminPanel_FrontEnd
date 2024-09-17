@@ -1,3 +1,5 @@
+const ErishLoginCheck = localStorage.getItem('ErishLogin');
+const isErishLoggedIn = ErishLoginCheck !== 'false' && ErishLoginCheck !== null;
 
 export const summaryPageTopMenu = {
 	intro: { id: 'intro', text: 'Intro', path: '#intro', icon: 'Vrpano', subMenu: null },
@@ -64,13 +66,15 @@ export const dashboardPagesMenu = {
 	// 	path: 'loan-status',
 	// 	icon: 'RecentActors',
 	// },
-	Customer: {
+	...(isErishLoggedIn ? {
+		Customer: {
 		id: 'Customer',
 		text: 'Customer',
 		path: 'Customer',
 		icon: 'sticky_note_2',
 		subMenu: null,
 	},
+} : {}),
 	userlist: {
 		id: 'userlist',
 		text: 'Userlist',
@@ -78,13 +82,15 @@ export const dashboardPagesMenu = {
 		icon: 'sticky_note_2',
 		subMenu: null,
 	},
-	nbfclist: {
-		id: 'nbfclist',
-		text: 'NBFC List',
-		path: 'nbfclist',
-		icon: 'sticky_note_2',
-		subMenu: null,
-	},
+	...(isErishLoggedIn ? {
+		nbfclist: {
+			id: 'nbfclist',
+			text: 'NBFC List',
+			path: 'nbfclist',
+			icon: 'sticky_note_2',
+			subMenu: null,
+		},
+	} : {}),
 	
 	Roles: {
 		id: 'roles',

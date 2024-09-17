@@ -35,6 +35,8 @@ import Checks from '../../components/bootstrap/forms/Checks';
 
 const LoanData = () => {
 	const authToken = localStorage.getItem('token');
+	const ErishLoginCheck = localStorage.getItem('ErishLogin');
+
 	const [userData, setUserData] = useState(null);
 	const [sortColumn, setSortColumn] = useState('');
 	const [sortOrder, setSortOrder] = useState('asc');
@@ -392,7 +394,34 @@ const LoanData = () => {
 			alert("You must check the box to approve the loan.");
 		}
 	};
+	const isErishLoggedIn = ErishLoginCheck !== 'false' && ErishLoginCheck !== null;
+	const timeoutDuration = 60 * 60 * 1000; // 1 Hour
+	let timeout;
+	useEffect(() => {
+		if (!authToken) {
+			navigate('/auth-pages/login');
+		}
+	}, [authToken, navigate]);
 
+	const logout = () => {
+		localStorage.removeItem('token');
+		navigate('/auth-pages/login');
+	};
+	const resetTimeout = () => {
+		clearTimeout(timeout);
+		timeout = setTimeout(logout, timeoutDuration);
+	};
+
+	useEffect(() => {
+		window.addEventListener('mousemove', resetTimeout);
+		window.addEventListener('keypress', resetTimeout);
+		timeout = setTimeout(logout, timeoutDuration);
+		return () => {
+			window.removeEventListener('mousemove', resetTimeout);
+			window.removeEventListener('keypress', resetTimeout);
+			clearTimeout(timeout);
+		};
+	}, []);
 	return (
 		<PageWrapper>
 			<Page>
@@ -404,9 +433,11 @@ const LoanData = () => {
 							</CardTitle>
 						</CardLabel>
 						<CardActions>
-							<Link to='' onClick={fetchDistributeData}>
-								<Button color='info'>Distribute Loan Applications</Button>
-							</Link>
+							{isErishLoggedIn && (
+      							<Link to='' onClick={fetchDistributeData}>
+      							  <Button color='info'>Distribute Loan Applications</Button>
+      						</Link>
+   						 )}
 							<Link to=''>
 								<Button
 									icon='FilterList'

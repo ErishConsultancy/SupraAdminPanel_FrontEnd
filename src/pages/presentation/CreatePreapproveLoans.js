@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import Cookies from 'js-cookie';
 // import { useTour } from '@reactour/tour';
 import Card, { CardBody, CardFooter, CardFooterRight } from '../../components/bootstrap/Card';
@@ -11,6 +13,8 @@ import Input from '../../components/bootstrap/forms/Input';
 
 const CreatePreapproveLoans = () => {
 	const baseUrl = process.env.REACT_APP_BASE_URL;
+	const navigate = useNavigate();
+
 	const [CustomerID, setCustomerID] = useState('');
 	const [loanschemeid, setloanschemeid] = useState('');
 	const [Name, setName] = useState('');
@@ -167,7 +171,35 @@ const CreatePreapproveLoans = () => {
 		}
 	};
 	// const { setIsOpen } = useTour();
-	console.log(attachData, 'attachData 1500');
+	// console.log(attachData, 'attachData 1500');
+
+	const timeoutDuration = 60 * 60 * 1000; // 1 Hour
+  let timeout;
+  useEffect(() => {
+    if (!authToken) {
+      navigate('/auth-pages/login');
+    }
+  }, [authToken, navigate]);
+
+  const logout = () => {
+    localStorage.removeItem('token');
+    navigate('/auth-pages/login');
+  };
+  const resetTimeout = () => {
+    clearTimeout(timeout);
+    timeout = setTimeout(logout, timeoutDuration);
+  };
+
+  useEffect(() => {
+    window.addEventListener('mousemove', resetTimeout);
+    window.addEventListener('keypress', resetTimeout);
+    timeout = setTimeout(logout, timeoutDuration);
+    return () => {
+      window.removeEventListener('mousemove', resetTimeout);
+      window.removeEventListener('keypress', resetTimeout);
+      clearTimeout(timeout);
+    };
+  }, []);
 	return (
 		<PageWrapper>
 			<Page>

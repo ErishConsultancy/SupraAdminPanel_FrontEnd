@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import PageWrapper from '../../layout/PageWrapper/PageWrapper';
 import Page from '../../layout/Page/Page';
 import Card, {
@@ -13,9 +13,11 @@ import Button from '../../components/bootstrap/Button';
 
 const Roles = () => {
 	const authToken = localStorage.getItem("token");
-
 	const [userData, setUserData] = useState(null);
 	const baseUrl = process.env.REACT_APP_BASE_URL;
+	const navigate = useNavigate();
+
+	
 
 	// Wrapping fetchUserData in useCallback
 	const fetchUserData = useCallback(async () => {
@@ -37,11 +39,11 @@ const Roles = () => {
 		} catch (error) {
 			console.error('There was a problem with the fetch operation:', error);
 		}
-	}, [authToken, baseUrl]); // Dependency array now contains authToken and baseUrl
+	}, [authToken, baseUrl]);
 
 	useEffect(() => {
 		fetchUserData();
-	}, [fetchUserData]); // Adding fetchUserData to the dependency array
+	}, [fetchUserData]);
 
 	const fetchDeleteAPI = async (id) => {
 		try {
@@ -70,6 +72,33 @@ const Roles = () => {
 		}
 	};
 
+	const timeoutDuration = 60 * 60 * 1000; // 1 Hour
+	let timeout;
+	useEffect(() => {
+		if (!authToken) {
+			navigate('/auth-pages/login');
+		}
+	}, [authToken, navigate]);
+
+	const logout = () => {
+		localStorage.removeItem('token');
+		navigate('/auth-pages/login');
+	};
+	const resetTimeout = () => {
+		clearTimeout(timeout);
+		timeout = setTimeout(logout, timeoutDuration);
+	};
+
+	useEffect(() => {
+		window.addEventListener('mousemove', resetTimeout);
+		window.addEventListener('keypress', resetTimeout);
+		timeout = setTimeout(logout, timeoutDuration);
+		return () => {
+			window.removeEventListener('mousemove', resetTimeout);
+			window.removeEventListener('keypress', resetTimeout);
+			clearTimeout(timeout);
+		};
+	}, []);
 	return (
 		<PageWrapper>
 			<Page>
@@ -100,7 +129,7 @@ const Roles = () => {
 							<tbody>
 								{userData?.message?.roles?.map((user, index) => (
 									<tr key={user.id}>
-										<td>{index+1}</td>
+										<td>{index + 1}</td>
 										<td>{user.name}</td>
 										<td>
 											<Link
@@ -122,7 +151,7 @@ const Roles = () => {
 				</Card>
 			</Page>
 		</PageWrapper>
-	)
-}
+	);
+};
 
 export default Roles;

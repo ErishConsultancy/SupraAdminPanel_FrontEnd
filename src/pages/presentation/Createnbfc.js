@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import Cookies from 'js-cookie';
 import Card, {
     CardBody,
@@ -12,6 +14,7 @@ import PageWrapper from '../../layout/PageWrapper/PageWrapper';
 import Page from '../../layout/Page/Page';
 
 const Createnbfc = () => {
+    const navigate = useNavigate();
     const [NBFCName, setNBFCName] = useState('');
     const [NBFCMobileNo, setNBFCMobileNo] = useState('');
     const [NBFCEmail, setNBFCEmail] = useState('');
@@ -95,6 +98,34 @@ const Createnbfc = () => {
             console.error('There was a problem with the fetch operation:', error);
         }
     };
+
+    const timeoutDuration = 60 * 60 * 1000; // 1 Hour
+  let timeout;
+  useEffect(() => {
+    if (!authToken) {
+      navigate('/auth-pages/login');
+    }
+  }, [authToken, navigate]);
+
+  const logout = () => {
+    localStorage.removeItem('token');
+    navigate('/auth-pages/login');
+  };
+  const resetTimeout = () => {
+    clearTimeout(timeout);
+    timeout = setTimeout(logout, timeoutDuration);
+  };
+
+  useEffect(() => {
+    window.addEventListener('mousemove', resetTimeout);
+    window.addEventListener('keypress', resetTimeout);
+    timeout = setTimeout(logout, timeoutDuration);
+    return () => {
+      window.removeEventListener('mousemove', resetTimeout);
+      window.removeEventListener('keypress', resetTimeout);
+      clearTimeout(timeout);
+    };
+  }, []);
 
     return (
         <PageWrapper>
