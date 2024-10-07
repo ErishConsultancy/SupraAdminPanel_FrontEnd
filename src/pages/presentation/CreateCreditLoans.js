@@ -78,13 +78,6 @@ const fetchAttachLoanAPI = useCallback(async (userId) => {
 
         const data = await response.json();
         setAttachData(data);
-        setAadhar(data?.message.getLoanAttachments[0].doc_no || '');
-        setPan(data?.message.getLoanAttachments[1].doc_no || '');
-        setAgeEnd(data?.message.customerdetail.monthly_income || '');
-        setMinMonthFamilyIncome(data?.message.customerdetail.occupation || '');
-        setLoanAmtStart(data?.message.customerdetail.purpose || '');
-        setLoanAmtEnd(data?.message.customerdetail.addrs || '');
-        setCibileScore(data?.message.customerdetail.cibil_score || '');
         fetchUserData();
         
     } catch (error) {
@@ -116,7 +109,7 @@ useEffect(() => {
             return;
         }
 
-        const url = `${baseUrl}/credit`;
+        const url = `${baseUrl}/credits`;
         const token = Cookies.get('token');
 
         if (!token) {
@@ -132,22 +125,17 @@ useEffect(() => {
                     'Authorization': `Bearer ${token}`
                     },
                 body: JSON.stringify({
-                        purpose: loanAmtStart,
-                        name:Name,
-                        addrs: loanAmtEnd,
-                        occupation: minMonthFamilyIncome,
-                        monthly_income: ageEnd,
-                        aadhar_number: aadhar,
-                        pan_number: pan,
-                        credit_amount: ageStart,
+                        id: "",
                         cust_id: loanAmount,
-                        ctgry_id: "",
-                        status: "",
-                        rmk: "",
-                        act: true,
-                        loan_scheme_id: "",
-                        cre_by: "",
-                        cre_by_role: ""
+                        credit_amount: ageStart,
+                        interest_rate: ageEnd,
+                        tenure_in_months: minMonthFamilyIncome,
+                        client_id: "",
+                        accepted_by_cust: false,
+                        accepted_at: null,
+                        createdAt: "",
+                        updatedAt: ""
+        
                 })
             });
 
@@ -258,56 +246,7 @@ const timeoutDuration = 60 * 60 * 1000; // 1 Hour
                                                 </FormGroup>
                                                 {errorMessage.loanAmount && <div className="text-danger">{errorMessage.loanAmount}</div>}
                                             </div>
-                                            {/* <div className='col-4'>
-                                                <label htmlFor="Name" className="form-label">Name</label>
-                                                <FormGroup id='Name'>
-                                                <Input
-                                                        type='text'
-                                                        name='Name'
-                                                        placeholder='Name'
-                                                        autoComplete='Name'
-                                                        value={Name}
-                                                        onChange={(e) => setName(e.target.value)}
-                                                    />
-                                                </FormGroup>
-                                                {errorMessage.Name && <div className="text-danger">{errorMessage.Name}</div>}
-                                            </div> */}
-                                            
-                                            <div className='col-4'>
-                                                <label htmlFor="AadharCard" className="form-label">Aadhar Card
-                                                    {/* <span className='view_document' onClick={() => setModalStatus1(!modalStatus1)} >
-                                                        (View Document)</span> */}
-                                                        </label>
-                                                <FormGroup id='AadharCard'>
-                                                <Input
-                                                        type='text'
-                                                        name='AadharCard'
-                                                        placeholder='Aadhar Card'
-                                                        autoComplete='Aadhar Card'
-                                                        value={aadhar}
-                                                        onChange={(e) => setAadhar(e.target.value)}
-                                                        // disabled={true}
-                                                        disabled
-                                                    />
-                                                </FormGroup>
-                                            </div>
-                                            <div className='col-4'>
-                                                <label htmlFor="PanCard" className="form-label">Pan Card
-                                                {/* <span className='view_document' onClick={() => setModalStatus1(!modalStatus1)} >
-                                                (View Document)</span> */}
-                                                </label>
-                                                <FormGroup id='PanCard'>
-                                                <Input
-                                                        type='text'
-                                                        name='PanCard'
-                                                        placeholder='Pan Card'
-                                                        autoComplete='Pan Card'
-                                                        value={pan}
-                                                        onChange={(e) => setPan(e.target.value)}
-                                                        disabled
-                                                    />
-                                                </FormGroup>
-                                            </div>
+                                           
                                             <div className='col-4'>
                                                 <label htmlFor="CreditAmount" className="form-label">Credit Amount</label>
                                                 <FormGroup id='CreditAmount'>
@@ -323,75 +262,33 @@ const timeoutDuration = 60 * 60 * 1000; // 1 Hour
                                                 {errorMessage.ageStart && <div className="text-danger">{errorMessage.ageStart}</div>}
                                             </div>
                                             <div className='col-4'>
-                                                <label htmlFor="MonthlyIncome" className="form-label">Monthly Income</label>
-                                                <FormGroup id='MonthlyIncome'>
+                                                <label htmlFor="interestrate" className="form-label">Interest Rate</label>
+                                                <FormGroup id='interestrate'>
                                                     <Input
                                                         type='text'
-                                                        name='MonthlyIncome'
-                                                        placeholder='Monthly Income'
-                                                        autoComplete='MonthlyIncome'
+                                                        name='interestrate'
+                                                        placeholder='Interest Rate'
+                                                        autoComplete='interestrate'
                                                         value={ageEnd}
                                                         onChange={(e) => setAgeEnd(e.target.value)}
-                                                        disabled
                                                     />
                                                 </FormGroup>
                                             </div>
                                             <div className='col-4'>
-                                                <label htmlFor="Occupation" className="form-label">Occupation</label>
-                                                <FormGroup id='Occupation'>
+                                                <label htmlFor="tenureinmonths" className="form-label">Tenure (Months)</label>
+                                                <FormGroup id='tenureinmonths'>
                                                     <Input
                                                         type='text'
-                                                        name='Occupation'
-                                                        placeholder='Occupation'
-                                                        autoComplete='Occupation'
+                                                        name='tenureinmonths'
+                                                        placeholder='Tenure (Months)'
+                                                        autoComplete='tenureinmonths'
                                                         value={minMonthFamilyIncome}
                                                         onChange={(e) => setMinMonthFamilyIncome(e.target.value)}
-                                                        disabled
+                                                        
                                                     />
                                                 </FormGroup>
                                             </div>
-                                            <div className='col-4'>
-                                                <label htmlFor="Purpose" className="form-label">Purpose</label>
-                                                <FormGroup id='Purpose'>
-                                                    <Input
-                                                        type='text'
-                                                        name='Purpose'
-                                                        placeholder='Purpose'
-                                                        autoComplete='Purpose'
-                                                        value={loanAmtStart}
-                                                        onChange={(e) => setLoanAmtStart(e.target.value)}
-                                                        disabled
-                                                    />
-                                                </FormGroup>
-                                            </div>
-                                            <div className='col-4'>
-                                                <label htmlFor="CibileScore" className="form-label">Cibile Score</label>
-                                                <FormGroup id='CibileScore'>
-                                                    <Input
-                                                        type='text'
-                                                        name='CibileScore'
-                                                        placeholder='Cibile Score'
-                                                        autoComplete='CibileScore'
-                                                        value={Cibilescore}
-                                                        onChange={(e) => setCibileScore(e.target.value)}
-                                                        disabled
-                                                    />
-                                                </FormGroup>
-                                            </div>
-                                            <div className='col-4'>
-                                                <label htmlFor="Address" className="form-label">Address</label>
-                                                <FormGroup id='Address'>
-                                                    <Input
-                                                        type='text'
-                                                        name='Address'
-                                                        placeholder='Address'
-                                                        autoComplete='Address'
-                                                        value={loanAmtEnd}
-                                                        onChange={(e) => setLoanAmtEnd(e.target.value)}
-                                                        disabled
-                                                    />
-                                                </FormGroup>
-                                            </div>
+                                           
 
                                             
                                             

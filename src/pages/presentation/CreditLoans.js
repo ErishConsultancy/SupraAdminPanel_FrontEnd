@@ -25,7 +25,7 @@ const CreditLoans = () => {
 
 	const fetchUserData = useCallback(async () => {
 		try {
-			const response = await fetch('https://suprafinleaselimitedbe-production.up.railway.app/api/credit', {
+			const response = await fetch('https://suprafinleaselimitedbe-production.up.railway.app/api/credits', {
 				method: 'GET',
 				headers: {
 					'Content-Type': 'application/json',
@@ -48,7 +48,7 @@ const CreditLoans = () => {
 		fetchUserData();
 	}, [fetchUserData]); // fetchUserData is now stable
 
-	console.log(userData, "userData Credit");
+	console.log(userData, "userData Credit userData");
     const { themeStatus } = useDarkMode();
 
     const getStatusClass = (status) => {
@@ -147,19 +147,12 @@ const CreditLoans = () => {
 								<tr>
 									<th scope='col'>Sr.</th>
 									{/* <th scope='col'>Cust_ID</th> */}
-									<th scope='col'>Aadhar No.</th>
-									<th scope='col'>Address</th>
+									<th scope='col'>cust_id</th>
 
                                     <th scope='col'>Credit Amount</th>
-                                    <th scope='col'>Monthly Income</th>
-                                    <th scope='col'>Pan Card</th>
-                                    <th scope='col'>Occupation</th>
-                                    <th scope='col'>Purpose</th>
-                                    <th scope='col'>Created By</th>
-                                    <th scope='col'>Reject By</th>
-                                    <th scope='col'>Reject Reason</th>
-                                    <th scope='col'>Cibil Score</th>
-									<th scope='col'>Status</th>
+                                    <th scope='col'>Interest Rate</th>
+                                    <th scope='col'>Tenure Months</th>
+									{/* <th scope='col'>Status</th> */}
                                     <th scope='col'>Action</th>
 								</tr>
 							</thead>
@@ -168,18 +161,15 @@ const CreditLoans = () => {
 									<tr key={user.id}>
 										<td>{index+1}</td>
 										{/* <td>{user.cust_id}</td> */}
-                                        <td>{user.aadhar_number}</td>
-                                        <td>{user.addrs}</td>
+                                        <td> <Link 
+                                  to={{
+									pathname: `/Pre-loan-instalments/${user.id}`,
+								}}
+                            >{user.cust_id}</Link></td>
 										<td>{user.credit_amount}</td>
-										<td>{user.monthly_income}</td>
-                                        <td>{user.pan_number}</td>
-                                        <td>{user.occupation}</td>
-                                        <td>{user.purpose}</td>
-                                        <td>{user.assigned_nbfc}</td>
-                                        <td>{user.rejected_by}</td>
-                                        <td>{user.rejection_reason}</td>
-                                        <td>{user.cibil_score}</td>
-                                        <td className={getStatusClass(user.status)}>{user.status}</td>
+										<td>{user.interest_rate}</td>
+                                        <td>{user.tenure_in_months}</td>
+                                        {/* <td className={getStatusClass(user.status)}>{user.status}</td> */}
 
 										<td>
                                         <Dropdown>

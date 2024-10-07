@@ -33,9 +33,10 @@ import OffCanvas, {
 } from '../../components/bootstrap/OffCanvas';
 import Checks from '../../components/bootstrap/forms/Checks';
 
-const LoanData = () => {
+const PreApproveApplication = () => {
 	const authToken = localStorage.getItem('token');
 	const ErishLoginCheck = localStorage.getItem('ErishLogin');
+	const baseUrl = process.env.REACT_APP_BASE_URL;
 
 	const [userData, setUserData] = useState(null);
 	const [sortColumn, setSortColumn] = useState('');
@@ -59,29 +60,27 @@ const LoanData = () => {
 
 
 	console.log(rejectLoanId, 'rejectLoanId');
-	const fetchUserData = useCallback(async () => {
-		try {
-			const response = await fetch(
-				'https://suprafinleaselimitedbe-production.up.railway.app/api/nbfc/loan-application',
-				{
-					method: 'GET',
-					headers: {
-						'Content-Type': 'application/json',
-						Authorization: `Bearer ${authToken}`,
-					},
-				},
-			);
 
-			if (!response.ok) {
-				throw new Error('Network response was not ok');
-			}
+    const fetchUserData = useCallback(async () => {
+        try {
+            const response = await fetch(`${baseUrl}/pre-approve-app/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                }
+            });
 
-			const data = await response.json();
-			setUserData(data);
-		} catch (error) {
-			console.error('There was a problem with the fetch operation:', error);
-		}
-	}, [authToken]);
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const data = await response.json();
+            setUserData(data);
+        } catch (error) {
+            console.error('There was a problem with the fetch operation:', error);
+        }
+    }, [authToken]);
 
 	useEffect(() => {
 		fetchUserData();
@@ -429,96 +428,44 @@ const LoanData = () => {
 					<CardHeader>
 						<CardLabel>
 							<CardTitle tag='div' className='h5'>
-								All Loans
+								All Pre Approve Loans
 							</CardTitle>
 						</CardLabel>
-						<CardActions>
-							{/* {isErishLoggedIn && ( */}
-      							<Link to='' onClick={fetchDistributeData}>
-      							  <Button color='info'>Distribute Loan Applications</Button>
-      						</Link>
-   						 {/* )} */}
-							<Link to=''>
-								<Button
-									icon='FilterList'
-									className='filter-icon-2 btn-icon-22'
-									onClick={() => setOffcanvasStatus(true)}></Button>
-							</Link>
-							{showAlert && (
-								<div className=''>
-									<p style={{ textAlign: 'left' }}>{alertMessage}</p>
-								</div>
-							)}
-						</CardActions>
+						
 					</CardHeader>
 
 					<CardBody className='table-responsive table-2' isScrollable>
 						<table className='table table-modern table-hover'>
 							<thead>
-								<tr>
-									<th scope='col'>Sr.</th>
-									{/* <th scope='col' onClick={() => handleSort('id')}>
-                    ID {renderSortIcon('id')}
-                  </th> */}
-									{/* <th scope='col' onClick={() => handleSort('cust_id')}>
-                    Cust Id {renderSortIcon('cust_id')}
-                  </th> */}
-									<th scope='col' onClick={() => handleSort('loan_scheme_id')}>
-										Loan Scheme Id {renderSortIcon('loan_scheme_id')}
+                            <tr>
+								<th scope='col'>Sr.</th>
+                                <th scope='col'>Cust ID</th>
+                                <th scope='col'>Occupation</th>
+                                <th scope='col'>Monthly Income</th>
+								<th scope='col'>Aadhar Number</th>
+                                <th scope='col'>Pan Number</th>
+                                <th scope='col'>Cibil Score</th>
+                                <th scope='col'>Status</th>
+									<th scope='col'>
+										Actions
 									</th>
-									<th scope='col' onClick={() => handleSort('name')}>
-										Customer Name {renderSortIcon('name')}
-									</th>
-									<th scope='col' onClick={() => handleSort('aadhar_number')}>
-										Aadhar No. {renderSortIcon('aadhar_number')}
-									</th>
-									<th scope='col' onClick={() => handleSort('pan_number')}>
-										Pan No. {renderSortIcon('pan_number')}
-									</th>
-									<th scope='col' onClick={() => handleSort('loan_amount')}>
-										Loan Amount {renderSortIcon('loan_amount')}
-									</th>
-									<th scope='col' onClick={() => handleSort('monthly_income')}>
-										Monthly Income {renderSortIcon('monthly_income')}
-									</th>
-									<th scope='col' onClick={() => handleSort('occupation')}>
-										Occupation {renderSortIcon('occupation')}
-									</th>
-									<th scope='col' onClick={() => handleSort('purpose')}>
-										Purpose {renderSortIcon('purpose')}
-									</th>
-									<th scope='col' onClick={() => handleSort('cibil_score')}>
-										Cibil Score {renderSortIcon('cibil_score')}
-									</th>
-									<th scope='col' onClick={() => handleSort('status')}>
-										Status {renderSortIcon('status')}
-									</th>
-									<th scope='col'>Actions</th>
 								</tr>
 							</thead>
 							<tbody>
-								{currentItems?.map((item, index) => (
-									<tr key={item.id}>
+							{userData?.message?.getAllPreApprove?.preApprove?.map((user, index) => (
+									<tr key={user.id}>
 										<td>{index + 1}</td>
 										{/* <td>{item.id}</td> */}
 										{/* <td>{item.cust_id}</td> */}
-										<td>{item.loan_scheme_id}</td>
-										<td>
-											<Link to={`/loanprofile/${item.id}`}>
-												{item?.customer?.fname}
-											</Link>
+                                        <td><Link to={`/loanprofile/${user.id}`}>{user.cust_id}</Link></td>
+										<td>{user.occupation}</td>
+                                        <td>{user.monthly_income}</td>
+                                        <td>{user.aadhar_number}</td>
+										<td>{user.pan_number}</td>
+                                        <td>{user.cibil_score}</td>
+										<td className={getStatusClass(user.status)}>
+											{user.status}
 										</td>
-										<td>{item?.aadhar_number}</td>
-										<td>{item?.pan_number}</td>
-										<td>{item.loan_amount}</td>
-										<td>{item.monthly_income}</td>
-										<td>{item.occupation}</td>
-										<td>{item.purpose}</td>
-										<td>{item.cibil_score}</td>
-										<td className={getStatusClass(item.status)}>
-											{item.status}
-										</td>
-										{item.status === 'CRE' || item.status === 'REJ' ? (
 											<td>
 												<Dropdown>
 													<DropdownToggle hasIcon={false}>
@@ -531,7 +478,7 @@ const LoanData = () => {
 													<DropdownMenu isAlignmentEnd>
 														<DropdownItem>
 															<Button
-																onClick={() => { setApproveLoanId(item.id); 
+																onClick={() => { setApproveLoanId(user.id); 
 																	setModalStatus2(true);}
 																	// handleApproveClick(item.id)
 																}>
@@ -541,7 +488,7 @@ const LoanData = () => {
 														<DropdownItem>
 															<Button
 																onClick={() => {
-																	setRejectLoanId(item.id);
+																	setRejectLoanId(user.id);
 																	setModalStatus1(true);
 																}}>
 																Reject
@@ -550,29 +497,7 @@ const LoanData = () => {
 													</DropdownMenu>
 												</Dropdown>
 											</td>
-										) : (
-											<td>
-												<Dropdown>
-													<DropdownToggle hasIcon={false}>
-														<Button
-															color={themeStatus}
-															icon='MoreHoriz'
-															aria-label='More options'
-														/>
-													</DropdownToggle>
-													<DropdownMenu isAlignmentEnd>
-														<DropdownItem>
-															<Link
-																to={`../loan-installments/${item.id}`}>
-																<Button>
-																	Check Loan Installments
-																</Button>
-															</Link>
-														</DropdownItem>
-													</DropdownMenu>
-												</Dropdown>
-											</td>
-										)}
+										
 									</tr>
 								))}
 							</tbody>
@@ -892,5 +817,4 @@ const LoanData = () => {
 		</PageWrapper>
 	);
 };
-
-export default LoanData;
+export default PreApproveApplication

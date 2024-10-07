@@ -120,6 +120,13 @@ export const dashboardPagesMenu = {
 		icon: 'sticky_note_2',
 		subMenu: null,
 	},
+	PreApproveLoanApplication: {
+		id: 'PreApproveLoanApplication',
+		text: 'Pre Approve Application',
+		path: 'pre-approve-application',
+		icon: 'sticky_note_2',
+		subMenu: null,
+	},
 	SendMessage: {
 		id: 'SendMessage',
 		text: 'SendMessage',
@@ -230,6 +237,12 @@ export const dashboardPagesMenu = {
 		id: 'EditLoans',
 		text: 'Edit Loans',
 		path: 'editloans',
+		hide: true,
+	},
+	Preloaninstalments: {
+		id: 'Preloaninstalments',
+		text: 'Preloan Instalments',
+		path: 'Pre-loan-instalments',
 		hide: true,
 	},
 	EditUser: {

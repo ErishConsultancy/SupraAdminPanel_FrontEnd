@@ -30,6 +30,8 @@ import EditPreApproveLoan from '../pages/presentation/EditPreApproveLoan';
 import GetLoans from '../pages/presentation/GetLoans';
 import EditLoans from '../pages/presentation/EditLoans';
 import LoanInstallments from '../pages/presentation/LoanInstallments';
+import PreApproveApplication from '../pages/presentation/PreApproveApplication';
+import PreLoanInstallments from '../pages/presentation/PreLoanInstallments';
 
 const LANDING = {
 	DASHBOARD: lazy(() => import('../pages/presentation/dashboard/DashboardPage')),
@@ -66,6 +68,10 @@ const LANDING = {
 	GetLoans: lazy(() => import('../pages/presentation/GetLoans')),
 	EditLoans: lazy(() => import('../pages/presentation/EditLoans')),
 	LoanInstallments: lazy(() => import('../pages/presentation/LoanInstallments')),
+	PreApproveApplication: lazy(() => import('../pages/presentation/PreApproveApplication')),
+	PreLoanInstallments: lazy(() => import('../pages/presentation/PreLoanInstallments')),
+
+
 };
 
 
@@ -225,6 +231,10 @@ const presentation: RouteProps[] = [
 		element: <LANDING.CreatePreapproveLoans />,
 	},
 	{
+		path: dashboardPagesMenu.PreApproveLoanApplication.path,
+		element: <LANDING.PreApproveApplication />,
+	},
+	{
 		path: dashboardPagesMenu.Roles.path,
 		element: <LANDING.Roles />,
 	},
@@ -275,6 +285,10 @@ const presentation: RouteProps[] = [
 	{
 		path: `${dashboardPagesMenu.Editloanschemeloan.path}/:id`,
 		element: <LANDING.EditloanSchemeName />,
+	},
+	{
+		path: `${dashboardPagesMenu.Preloaninstalments.path}/:id`,
+		element: <LANDING.PreLoanInstallments />,
 	},
 	{
 		path: `${dashboardPagesMenu.EditLoans.path}/:id`,

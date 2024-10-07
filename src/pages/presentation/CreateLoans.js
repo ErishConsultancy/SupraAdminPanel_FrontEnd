@@ -38,7 +38,8 @@ const CreateLoans = () => {
     const [errorMessage, setErrorMessage] = useState({});
     const [userData, setUserData] = useState(null);
     const authToken = localStorage.getItem("token");
-
+    const [PreApproveData, setPreApproveData] = useState('');
+    
     
     useEffect(() => {
         const fetchUserData = async () => {
@@ -127,6 +128,7 @@ const CreateLoans = () => {
                     // month_tenure_start: monthTenureStart,
                     // month_tenure_end: monthTenureEnd,
                     process_fee: processFeeStart,
+                    is_pre_approve:PreApproveData,
                     // process_fee_end: processFeeEnd,
                     is_act: true
                 })
@@ -138,7 +140,7 @@ const CreateLoans = () => {
 
             await response.json();
             alert('Thank you! Your record has been successfully submitted.');
-            // window.location.href = '/get-loans';
+            window.location.href = '/get-loans';
 
         } catch (error) {
             console.error('There was a problem with the fetch operation:', error);
@@ -430,6 +432,7 @@ const CreateLoans = () => {
                                                 </FormGroup>
                                             </div>
                                             
+                                            
                                             {/* <div className='col-4'>
                                                 <label htmlFor="AgeEnd" className="form-label">Age End</label>
                                                 <FormGroup id='AgeEnd'>
@@ -501,6 +504,20 @@ const CreateLoans = () => {
                                                     />
                                                 </FormGroup>
                                                 {errorMessage.Description && <div className="text-danger">{errorMessage.Description}</div>}
+                                            </div>
+                                            <div className='col-4'>
+                                                <label htmlFor="PreApprove" className="form-label">Pre Approve</label>
+                                                <FormGroup id='PreApprove'>
+                                                    <select
+                                                        value={PreApproveData}
+                                                        onChange={(e) => setPreApproveData(e.target.value)}
+                                                        className='selectvalue'
+                                                    >
+                                                        <option value=''>Pre Approve</option>
+                                                        <option value='true'>Yes</option>
+                                                        <option value='false'>No</option>
+                                                    </select>
+                                                </FormGroup>
                                             </div>
                                             {/* <div className='col-4'>
                                                 <label htmlFor="ProcessFeeEnd" className="form-label">Process Fee End</label>

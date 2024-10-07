@@ -101,7 +101,17 @@ const GetLoans = () => {
 		clearTimeout(timeout);
 	  };
 	}, []);
-
+	const getStatusClass = (status) => {
+		switch (status) {
+			case 'false':
+				return 'No';
+			case 'true':
+				return 'Yes';
+			default:
+				return '';
+		}
+	};
+console.log(userData, "userData Check 2")
 	return (
 		<PageWrapper>
 			<Page>
@@ -135,6 +145,7 @@ const GetLoans = () => {
                                     <th scope='col'>Family Income</th>
                                     <th scope='col'>Tenure(in months)</th>
                                     <th scope='col'>Process Fee</th>
+									<th scope='col'>Pre Approve</th>
 									<th scope='col'>Actions</th>
 								</tr>
 							</thead>
@@ -150,6 +161,7 @@ const GetLoans = () => {
                                         <td>{user.min_month_family_income}</td>
                                         <td>{user.loan_term_months}</td>
                                         <td>{user.process_fee}</td>
+										<td>{user.is_pre_approve ? 'true' : 'false'}</td>
 										<td>
 											<Link
 												to={{
