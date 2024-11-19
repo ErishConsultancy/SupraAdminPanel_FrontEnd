@@ -32,6 +32,7 @@ import EditLoans from '../pages/presentation/EditLoans';
 import LoanInstallments from '../pages/presentation/LoanInstallments';
 import PreApproveApplication from '../pages/presentation/PreApproveApplication';
 import PreLoanInstallments from '../pages/presentation/PreLoanInstallments';
+import GetPayout from '../pages/presentation/GetPayout';
 
 const LANDING = {
 	DASHBOARD: lazy(() => import('../pages/presentation/dashboard/DashboardPage')),
@@ -70,7 +71,7 @@ const LANDING = {
 	LoanInstallments: lazy(() => import('../pages/presentation/LoanInstallments')),
 	PreApproveApplication: lazy(() => import('../pages/presentation/PreApproveApplication')),
 	PreLoanInstallments: lazy(() => import('../pages/presentation/PreLoanInstallments')),
-
+	GetPayout: lazy(() => import('../pages/presentation/GetPayout')),
 
 };
 
@@ -237,6 +238,10 @@ const presentation: RouteProps[] = [
 	{
 		path: dashboardPagesMenu.Roles.path,
 		element: <LANDING.Roles />,
+	},
+	{
+		path: dashboardPagesMenu.GetPayout.path,
+		element: <LANDING.GetPayout />,
 	},
 	// {
 	// 	path: dashboardPagesMenu.LoanProfile.path,

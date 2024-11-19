@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import PageWrapper from '../../layout/PageWrapper/PageWrapper';
@@ -11,16 +11,10 @@ import User1Img from '../../assets/img/wanna/wanna2.png';
 import Checks from '../../components/bootstrap/forms/Checks';
 import Textarea from '../../components/bootstrap/forms/Textarea';
 
-import Card, {
-	CardActions,
-	CardBody,
-	CardHeader,
-	CardLabel,
-	CardTitle,
-} from '../../components/bootstrap/Card';
+import Card, { CardBody } from '../../components/bootstrap/Card';
 
 const SendMessage = () => {
-	const authToken = localStorage.getItem("token");
+	const authToken = localStorage.getItem('token');
 	const baseUrl = process.env.REACT_APP_BASE_URL;
 	const navigate = useNavigate();
 
@@ -30,15 +24,16 @@ const SendMessage = () => {
 	const [TemplateData, setTemplateData] = useState(null);
 	const [selectedTemplateId, setSelectedTemplateId] = useState('');
 	const [selectedTemplate, setSelectedTemplate] = useState('');
-
+	const timeout = useRef(null);
+	const timeoutDuration = 60 * 60 * 1000; // 1 Hour
 	const fetchUserData = useCallback(async () => {
 		try {
 			const response = await fetch(`${baseUrl}/nbfc/user`, {
 				method: 'GET',
 				headers: {
 					'Content-Type': 'application/json',
-					'Authorization': `Bearer ${authToken}`
-				}
+					Authorization: `Bearer ${authToken}`,
+				},
 			});
 
 			if (!response.ok) {
@@ -60,19 +55,20 @@ const SendMessage = () => {
 		setSelectedUsers((prevSelected) =>
 			prevSelected.includes(userId)
 				? prevSelected.filter((id) => id !== userId)
-				: [...prevSelected, userId]
+				: [...prevSelected, userId],
 		);
 		setSelectedMobileNumbers((prevSelected) =>
 			prevSelected.includes(mobileNumber)
 				? prevSelected.filter((number) => number !== mobileNumber)
-				: [...prevSelected, mobileNumber]
+				: [...prevSelected, mobileNumber],
 		);
 	};
 
 	const handleSelectAll = (e) => {
 		if (e.target.checked) {
 			const allUserIds = userData?.message?.users?.users?.map((user) => user.id) || [];
-			const allMobileNumbers = userData?.message?.users?.users?.map((user) => user.phone) || [];
+			const allMobileNumbers =
+				userData?.message?.users?.users?.map((user) => user.phone) || [];
 			setSelectedUsers(allUserIds);
 			setSelectedMobileNumbers(allMobileNumbers);
 		} else {
@@ -87,8 +83,8 @@ const SendMessage = () => {
 				method: 'GET',
 				headers: {
 					'Content-Type': 'application/json',
-					'Authorization': `Bearer ${authToken}`
-				}
+					Authorization: `Bearer ${authToken}`,
+				},
 			});
 
 			if (!response.ok) {
@@ -141,52 +137,51 @@ const SendMessage = () => {
 			console.error('There was a problem with the fetch operation:', error);
 		}
 	};
-	const timeoutDuration = 60 * 60 * 1000; // 1 Hour
-  let timeout;
-  useEffect(() => {
-    if (!authToken) {
-      navigate('/auth-pages/login');
-    }
-  }, [authToken, navigate]);
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    navigate('/auth-pages/login');
-  };
-  const resetTimeout = () => {
-    clearTimeout(timeout);
-    timeout = setTimeout(logout, timeoutDuration);
-  };
+	useEffect(() => {
+		if (!authToken) navigate('/auth-pages/login');
+	}, [authToken, navigate]);
 
-  useEffect(() => {
-    window.addEventListener('mousemove', resetTimeout);
-    window.addEventListener('keypress', resetTimeout);
-    timeout = setTimeout(logout, timeoutDuration);
-    return () => {
-      window.removeEventListener('mousemove', resetTimeout);
-      window.removeEventListener('keypress', resetTimeout);
-      clearTimeout(timeout);
-    };
-  }, []);
+	const logout = useCallback(() => {
+		localStorage.removeItem('token');
+		navigate('/auth-pages/login');
+	}, [navigate]);
+
+	const resetTimeout = useCallback(() => {
+		clearTimeout(timeout.current);
+		timeout.current = setTimeout(logout, timeoutDuration);
+	}, [logout, timeoutDuration]);
+
+	useEffect(() => {
+		window.addEventListener('mousemove', resetTimeout);
+		window.addEventListener('keypress', resetTimeout);
+
+		timeout.current = setTimeout(logout, timeoutDuration);
+
+		return () => {
+			window.removeEventListener('mousemove', resetTimeout);
+			window.removeEventListener('keypress', resetTimeout);
+			clearTimeout(timeout.current);
+		};
+	}, [resetTimeout, logout, timeoutDuration]);
 
 	return (
 		<PageWrapper>
 			<Page>
 				<Card stretch data-tour='list'>
 					<CardBody>
-						<h5 tag='div' className='h5'>Send Message</h5><br />
+						<h5 className='h5'>Send Message</h5>
 						<div className='row'>
 							<div className='col-lg-6'>
 								<div className='list-view-template'>
 									{TemplateData?.message?.getAllTemplate?.map((template) => (
 										<Link
-											to=""
+											to=''
 											key={template.id}
 											onClick={(e) => {
 												e.preventDefault();
 												handleTemplateClick(template.id, template.template);
-											}}
-										>
+											}}>
 											<p>{template.template}</p>
 										</Link>
 									))}
@@ -206,8 +201,7 @@ const SendMessage = () => {
 									color='info'
 									isOutline
 									className='send-button'
-									onClick={SendMessageAPI}
-								>
+									onClick={SendMessageAPI}>
 									Send
 								</Button>
 							</div>
@@ -220,8 +214,12 @@ const SendMessage = () => {
 									<th scope='col'>
 										<Checks
 											type='checkbox'
+											aria-label='Select all users'
 											onChange={handleSelectAll}
-											checked={selectedUsers.length === userData?.message?.users?.users?.length}
+											checked={
+												selectedUsers.length ===
+												userData?.message?.users?.users?.length
+											}
 											className='check-css'
 										/>
 									</th>
@@ -237,16 +235,36 @@ const SendMessage = () => {
 								{userData?.message?.users?.users?.map((user) => (
 									<tr key={user.id}>
 										<td>
-											<Checks
+											{/* <Checks
 												type='checkbox'
 												checked={selectedUsers.includes(user.id)}
-												onChange={() => handleCheckboxChange(user.id, user.phone)}
+												onChange={() =>
+													handleCheckboxChange(user.id, user.phone)
+												}
+												className='check-css'
+											/> */}
+											<Checks
+												type='checkbox'
+												aria-label={`Select user ${user.fname} ${user.lname}`}
+												checked={selectedUsers.includes(user.id)}
+												onChange={() =>
+													handleCheckboxChange(user.id, user.phone)
+												}
 												className='check-css'
 											/>
 										</td>
 										<td>{user.id}</td>
-										<td><Avatar srcSet={User1Webp} src={User1Img} size={32} alt="User" /></td>
-										<td>{user.fname} {user.lname}</td>
+										<td>
+											<Avatar
+												srcSet={User1Webp}
+												src={User1Img}
+												size={32}
+												alt='User'
+											/>
+										</td>
+										<td>
+											{user.fname} {user.lname}
+										</td>
 										<td>{`+91${user.phone}`}</td>
 										<td>{user.email}</td>
 										<td>{user.designation}</td>

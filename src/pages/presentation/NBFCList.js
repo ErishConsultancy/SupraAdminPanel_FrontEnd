@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Button from '../../components/bootstrap/Button';
 import PageWrapper from '../../layout/PageWrapper/PageWrapper';
@@ -15,6 +15,8 @@ const NBFCList = () => {
 	const authToken = localStorage.getItem("token");
 	const baseUrl = process.env.REACT_APP_BASE_URL;
 	const navigate = useNavigate();
+	const timeout = useRef(null);
+    const timeoutDuration = 60 * 60 * 1000;
 
 	const [userData, setUserData] = useState(null);
 
@@ -37,7 +39,7 @@ const NBFCList = () => {
         } catch (error) {
             console.error('There was a problem with the fetch operation:', error);
         }
-    }, [authToken]);
+    }, [authToken, baseUrl]);
 
     useEffect(() => {
         fetchUserData();
@@ -72,33 +74,33 @@ const NBFCList = () => {
 		}
 	};
 
-	const timeoutDuration = 60 * 60 * 1000; // 1 Hour
-  let timeout;
-  useEffect(() => {
-    if (!authToken) {
-      navigate('/auth-pages/login');
-    }
-  }, [authToken, navigate]);
+	useEffect(() => {
+        if (!authToken) navigate('/auth-pages/login');
+    }, [authToken, navigate]);
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    navigate('/auth-pages/login');
-  };
-  const resetTimeout = () => {
-    clearTimeout(timeout);
-    timeout = setTimeout(logout, timeoutDuration);
-  };
+    const logout = useCallback(() => {
+        localStorage.removeItem('token');
+        navigate('/auth-pages/login');
+    }, [navigate]);
 
-  useEffect(() => {
-    window.addEventListener('mousemove', resetTimeout);
-    window.addEventListener('keypress', resetTimeout);
-    timeout = setTimeout(logout, timeoutDuration);
-    return () => {
-      window.removeEventListener('mousemove', resetTimeout);
-      window.removeEventListener('keypress', resetTimeout);
-      clearTimeout(timeout);
-    };
-  }, []);
+    const resetTimeout = useCallback(() => {
+        clearTimeout(timeout.current);
+        timeout.current = setTimeout(logout, timeoutDuration);
+    }, [logout, timeoutDuration]);
+
+    useEffect(() => {
+        window.addEventListener('mousemove', resetTimeout);
+        window.addEventListener('keypress', resetTimeout);
+
+        timeout.current = setTimeout(logout, timeoutDuration);
+
+        return () => {
+            window.removeEventListener('mousemove', resetTimeout);
+            window.removeEventListener('keypress', resetTimeout);
+            clearTimeout(timeout.current);
+        };
+    }, [resetTimeout, logout, timeoutDuration]);
+
   
 	return (
 		<PageWrapper>

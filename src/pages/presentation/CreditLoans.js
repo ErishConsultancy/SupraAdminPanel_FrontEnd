@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import PageWrapper from '../../layout/PageWrapper/PageWrapper';
 import Page from '../../layout/Page/Page';
@@ -22,6 +22,8 @@ const CreditLoans = () => {
 	const navigate = useNavigate();
 
 	const [userData, setUserData] = useState(null);
+  const timeout = useRef(null);
+  const timeoutDuration = 60 * 60 * 1000;
 
 	const fetchUserData = useCallback(async () => {
 		try {
@@ -51,18 +53,18 @@ const CreditLoans = () => {
 	console.log(userData, "userData Credit userData");
     const { themeStatus } = useDarkMode();
 
-    const getStatusClass = (status) => {
-        switch (status) {
-          case 'CRE':
-            return 'orange';
-          case 'APR':
-            return 'green';
-          case 'REJ':
-            return 'red';
-          default:
-            return '';
-        }
-      };
+    // const getStatusClass = (status) => {
+    //     switch (status) {
+    //       case 'CRE':
+    //         return 'orange';
+    //       case 'APR':
+    //         return 'green';
+    //       case 'REJ':
+    //         return 'red';
+    //       default:
+    //         return '';
+    //     }
+    //   };
 
 	  const fetchDeleteAPI = async (id) => {
         try {
@@ -95,33 +97,33 @@ const CreditLoans = () => {
 	// const [perPage, setPerPage] = useState(PER_COUNT['5']);
 	// const { items, requestSort, getClassNamesFor } = useSortableData(data);
 
-	const timeoutDuration = 60 * 60 * 1000; // 1 Hour
-  let timeout;
-  useEffect(() => {
-    if (!authToken) {
-      navigate('/auth-pages/login');
-    }
-  }, [authToken, navigate]);
+	 
+useEffect(() => {
+  if (!authToken) navigate('/auth-pages/login');
+}, [authToken, navigate]);
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    navigate('/auth-pages/login');
-  };
-  const resetTimeout = () => {
-    clearTimeout(timeout);
-    timeout = setTimeout(logout, timeoutDuration);
-  };
+const logout = useCallback(() => {
+  localStorage.removeItem('token');
+  navigate('/auth-pages/login');
+}, [navigate]);
 
-  useEffect(() => {
-    window.addEventListener('mousemove', resetTimeout);
-    window.addEventListener('keypress', resetTimeout);
-    timeout = setTimeout(logout, timeoutDuration);
-    return () => {
+const resetTimeout = useCallback(() => {
+  clearTimeout(timeout.current);
+  timeout.current = setTimeout(logout, timeoutDuration);
+}, [logout, timeoutDuration]);
+
+useEffect(() => {
+  window.addEventListener('mousemove', resetTimeout);
+  window.addEventListener('keypress', resetTimeout);
+
+  timeout.current = setTimeout(logout, timeoutDuration);
+
+  return () => {
       window.removeEventListener('mousemove', resetTimeout);
       window.removeEventListener('keypress', resetTimeout);
-      clearTimeout(timeout);
-    };
-  }, []);
+      clearTimeout(timeout.current);
+  };
+}, [resetTimeout, logout, timeoutDuration]);
     
 	return (
 		<PageWrapper>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import Card, { CardBody, CardFooter, CardFooterRight } from '../../components/bootstrap/Card';
@@ -13,7 +13,8 @@ const EditloanSchemeName = () => {
 	const [Name, setName] = useState('');
 	const authToken = localStorage.getItem('token');
 	const navigate = useNavigate();
-
+	const timeout = useRef(null);
+    const timeoutDuration = 60 * 60 * 1000;
 	// console.log(authToken, 'authToken');
 
 	const [errorMessage, setErrorMessage] = useState({
@@ -93,40 +94,41 @@ useEffect(() => {
 
 			const json = await response.json();
 			alert('Thank you! Your record has been successfully submitted.');
-			window.location.href = '/loanscheme';
+			// window.location.href = '/loanscheme';
+			navigate('/loanscheme');
 			setUserData(json);
 		} catch (error) {
 			console.error('There was a problem with the fetch operation:', error);
 		}
 	};
 
-	const timeoutDuration = 60 * 60 * 1000; // 1 Hour
-  let timeout;
-  useEffect(() => {
-    if (!authToken) {
-      navigate('/auth-pages/login');
-    }
-  }, [authToken, navigate]);
+	 
+useEffect(() => {
+	if (!authToken) navigate('/auth-pages/login');
+}, [authToken, navigate]);
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    navigate('/auth-pages/login');
-  };
-  const resetTimeout = () => {
-    clearTimeout(timeout);
-    timeout = setTimeout(logout, timeoutDuration);
-  };
+const logout = useCallback(() => {
+	localStorage.removeItem('token');
+	navigate('/auth-pages/login');
+}, [navigate]);
 
-  useEffect(() => {
-    window.addEventListener('mousemove', resetTimeout);
-    window.addEventListener('keypress', resetTimeout);
-    timeout = setTimeout(logout, timeoutDuration);
-    return () => {
-      window.removeEventListener('mousemove', resetTimeout);
-      window.removeEventListener('keypress', resetTimeout);
-      clearTimeout(timeout);
-    };
-  }, []);
+const resetTimeout = useCallback(() => {
+	clearTimeout(timeout.current);
+	timeout.current = setTimeout(logout, timeoutDuration);
+}, [logout, timeoutDuration]);
+
+useEffect(() => {
+	window.addEventListener('mousemove', resetTimeout);
+	window.addEventListener('keypress', resetTimeout);
+
+	timeout.current = setTimeout(logout, timeoutDuration);
+
+	return () => {
+		window.removeEventListener('mousemove', resetTimeout);
+		window.removeEventListener('keypress', resetTimeout);
+		clearTimeout(timeout.current);
+	};
+}, [resetTimeout, logout, timeoutDuration]);
   
 	return (
 		<PageWrapper>

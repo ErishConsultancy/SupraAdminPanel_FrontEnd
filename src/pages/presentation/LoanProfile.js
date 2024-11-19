@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import PageWrapper from '../../layout/PageWrapper/PageWrapper';
 import Page from '../../layout/Page/Page';
 import Card, {
@@ -16,11 +16,12 @@ const LoanProfile = () => {
 	const authToken = localStorage.getItem("token");
 	const { id } = useParams();
 	const [modalStatus1, setModalStatus1] = useState(false);
-	const [attachData, setAttachData] = useState(null);
 	const [selectedImage, setSelectedImage] = useState(null);
 	const [userData, setUserData] = useState(null);
 	const [aadharNumber, setAadharNumber] = useState('');
 	const [panNumber, setPanNumber] = useState('');
+	const timeout = useRef(null);
+    const timeoutDuration = 60 * 60 * 1000;
 
 	const fetchUserData = useCallback(async () => {
 		try {
@@ -93,34 +94,33 @@ const LoanProfile = () => {
 	}, [fetchUserData]);
 
 	// console.log(userData, "userData New Profile");
+	useEffect(() => {
+        if (!authToken) navigate('/auth-pages/login');
+    }, [authToken, navigate]);
 
-	const timeoutDuration = 60 * 60 * 1000; // 1 Hour
-  let timeout;
-  useEffect(() => {
-    if (!authToken) {
-      navigate('/auth-pages/login');
-    }
-  }, [authToken, navigate]);
+    const logout = useCallback(() => {
+        localStorage.removeItem('token');
+        navigate('/auth-pages/login');
+    }, [navigate]);
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    navigate('/auth-pages/login');
-  };
-  const resetTimeout = () => {
-    clearTimeout(timeout);
-    timeout = setTimeout(logout, timeoutDuration);
-  };
+    const resetTimeout = useCallback(() => {
+        clearTimeout(timeout.current);
+        timeout.current = setTimeout(logout, timeoutDuration);
+    }, [logout, timeoutDuration]);
 
-  useEffect(() => {
-    window.addEventListener('mousemove', resetTimeout);
-    window.addEventListener('keypress', resetTimeout);
-    timeout = setTimeout(logout, timeoutDuration);
-    return () => {
-      window.removeEventListener('mousemove', resetTimeout);
-      window.removeEventListener('keypress', resetTimeout);
-      clearTimeout(timeout);
-    };
-  }, []);
+    useEffect(() => {
+        window.addEventListener('mousemove', resetTimeout);
+        window.addEventListener('keypress', resetTimeout);
+
+        timeout.current = setTimeout(logout, timeoutDuration);
+
+        return () => {
+            window.removeEventListener('mousemove', resetTimeout);
+            window.removeEventListener('keypress', resetTimeout);
+            clearTimeout(timeout.current);
+        };
+    }, [resetTimeout, logout, timeoutDuration]);
+
 	return (
 		<PageWrapper>
 			<Page>
@@ -176,14 +176,59 @@ const LoanProfile = () => {
 							<th>Purpose</th>
                             <td>{userData?.message?.loanApplications?.loanApplications?.purpose}</td>
 						</tr>
+
+						<tr>
+							<th>Pan Card Verified</th>
+							{userData?.message?.loanApplications?.loanApplications?.pan_verified === false ? (
+                            <td className='Not_verified'>Not Verified</td>
+							) : (
+								<td className='verified'>Verified</td>	
+							)}
+						</tr>
+						<tr>
+							<th>aadhaar_verified</th>
+							{userData?.message?.loanApplications?.loanApplications?.aadhaar_verified === false ? (
+                            <td className='Not_verified'>Not Verified</td>
+							) : (
+								<td className='verified'>Verified</td>	
+							)}
+						</tr>
+						<tr>
+							<th>pan_name_matched</th>
+							{userData?.message?.loanApplications?.loanApplications?.pan_name_matched === false ? (
+                            <td className='Not_verified'>Not Verified</td>
+							) : (
+								<td className='verified'>Verified</td>	
+							)}
+						</tr>
+						<tr>
+							<th>aadhaar_name_matched</th>
+							{userData?.message?.loanApplications?.loanApplications?.aadhaar_name_matched === false ? (
+                            <td className='Not_verified'>Not Verified</td>
+							) : (
+								<td className='verified'>Verified</td>	
+							)}
+						</tr>
+						<tr>
+							<th>address_matched</th>
+							{userData?.message?.loanApplications?.loanApplications?.address_matched === false ? (
+                            <td className='Not_verified'>Not Verified</td>
+							) : (
+								<td className='verified'>Verified</td>	
+							)}
+						</tr>
+						{userData?.message?.loanApplications?.loanApplications?.rejected_by ? (
                         <tr>
 							<th>Rejected By</th>
                             <td>{userData?.message?.loanApplications?.loanApplications?.rejected_by}</td>
 						</tr>
+						) : null}
+						{userData?.message?.loanApplications?.loanApplications?.rejection_reason ? (
                         <tr>
 							<th>Rejection Reason</th>
                             <td>{userData?.message?.loanApplications?.loanApplications?.rejection_reason}</td>
 						</tr>
+						) : null}
                         <tr>
 							<th>Status</th>
                             <td>{userData?.message?.loanApplications?.loanApplications?.status}</td>
@@ -216,13 +261,29 @@ const LoanProfile = () => {
 
             <tr key={itemname.id}>
 							<th>{itemname?.file_type}</th>
-              <td><img src={itemname?.url} alt={itemname?.file_type}
+              {/* <td><img src={itemname?.url} alt={itemname?.file_type}
 			//    onClick={() => setModalStatus1(!modalStatus1)}  
 			   onClick={() => {
 				setSelectedImage({ id: itemname.id, url: itemname.url });
 				setModalStatus1(true);
 			  }}
-			   className='image-size-1' /></td>
+			   className='image-size-1' /></td> */}
+
+
+<td>
+  <Link to = ""
+    onClick={() => {
+      setSelectedImage({ id: itemname.id, url: itemname.url });
+      setModalStatus1(true);
+    }}
+    className="image-size-1"
+    style={{ background: 'none', border: 'none', padding: 0 }}
+    aria-label="View image"
+  >
+    <img src={itemname?.url} alt={itemname?.file_type} />
+  </Link>
+</td>
+
 						</tr>
             ))}
     

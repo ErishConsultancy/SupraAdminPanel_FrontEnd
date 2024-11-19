@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 
 import Button from '../../components/bootstrap/Button';
@@ -10,7 +10,6 @@ import Card, {
 	CardHeader,
 	CardLabel,
 	CardTitle,
-	CardActions,
 } from '../../components/bootstrap/Card';
 import Dropdown, {
 	DropdownItem,
@@ -35,12 +34,12 @@ import Checks from '../../components/bootstrap/forms/Checks';
 
 const PreApproveApplication = () => {
 	const authToken = localStorage.getItem('token');
-	const ErishLoginCheck = localStorage.getItem('ErishLogin');
+	// const ErishLoginCheck = localStorage.getItem('ErishLogin');
 	const baseUrl = process.env.REACT_APP_BASE_URL;
 
 	const [userData, setUserData] = useState(null);
-	const [sortColumn, setSortColumn] = useState('');
-	const [sortOrder, setSortOrder] = useState('asc');
+	// const [sortColumn, setSortColumn] = useState('');
+	// const [sortOrder, setSortOrder] = useState('asc');
 	// const [searchQuery, setSearchQuery] = useState('');
 	const [modalStatus1, setModalStatus1] = useState(false);
 	const [modalStatus2, setModalStatus2] = useState(false);
@@ -50,13 +49,12 @@ const PreApproveApplication = () => {
 	const [rejectLoanId, setRejectLoanId] = useState(null);
 	const [ApproveLoanId, setApproveLoanId] = useState(null);
 
-	const [rejectLoanDoc, setRejectLoanDoc] = useState(null);
-	const [rejectLoanDocStatus, setRejectLoanDocStatus] = useState(null);
 	const [CustomerAttachData, setCustomerAttachData] = useState(null);
-	const [selectedUsers, setSelectedUsers] = useState([]);
 	const [isChecked, setIsChecked] = useState(false); // State for checkbox
 
 	const navigate = useNavigate();
+	const timeout = useRef(null);
+    const timeoutDuration = 60 * 60 * 1000;
 
 
 	console.log(rejectLoanId, 'rejectLoanId');
@@ -80,7 +78,7 @@ const PreApproveApplication = () => {
         } catch (error) {
             console.error('There was a problem with the fetch operation:', error);
         }
-    }, [authToken]);
+    }, [authToken, baseUrl]);
 
 	useEffect(() => {
 		fetchUserData();
@@ -90,14 +88,13 @@ const PreApproveApplication = () => {
 	const fetchApproveLoanAPI = async (id) => {
 		try {
 			const response = await fetch(
-				'https://suprafinleaselimitedbe-production.up.railway.app/api/nbfc/approve-loan',
+			`https://suprafinleaselimitedbe-production.up.railway.app/api/pre-approve-app/accept/${id}`,
 				{
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
 						Authorization: `Bearer ${authToken}`,
 					},
-					body: JSON.stringify({ id }),
 				},
 			);
 
@@ -115,7 +112,6 @@ const PreApproveApplication = () => {
 	const fetchRejectLoanAPI = async (id) => {
 		const errors = {
 			reason: !reason ? 'Please Enter Reason' : '',
-			rejectLoanDocStatus: !rejectLoanDocStatus ? 'Please Enter Document ID' : '',
 		};
 
 		setErrorMessage(errors);
@@ -124,7 +120,7 @@ const PreApproveApplication = () => {
 			return;
 		}
 
-		const url = 'https://suprafinleaselimitedbe-production.up.railway.app/api/nbfc/reject-loan';
+		const url = `https://suprafinleaselimitedbe-production.up.railway.app/api/pre-approve-app/reject/${id}`;
 		const token = Cookies.get('token');
 		if (!token) {
 			console.error('Authentication token is missing');
@@ -139,11 +135,7 @@ const PreApproveApplication = () => {
 					Authorization: `Bearer ${token}`,
 				},
 				body: JSON.stringify({
-					id,
-					id,
-					reason: reason,
-					isDocErr: rejectLoanDocStatus,
-					custAttachId: rejectLoanDoc,
+					rmk:reason,
 				}),
 			});
 
@@ -181,31 +173,30 @@ const PreApproveApplication = () => {
 		}
 	};
 
-	const handleSort = (column) => {
-		const order = sortOrder === 'asc' ? 'desc' : 'asc';
-		setSortOrder(order);
-		setSortColumn(column);
+	// const handleSort = (column) => {
+	// 	const order = sortOrder === 'asc' ? 'desc' : 'asc';
+	// 	setSortOrder(order);
+	// 	setSortColumn(column);
 
-		const sortedData = [...(userData?.message?.loanApplications?.loanApplications || [])].sort(
-			(a, b) => {
-				if (a[column] < b[column]) return order === 'asc' ? -1 : 1;
-				if (a[column] > b[column]) return order === 'asc' ? 1 : -1;
-				return 0;
-			},
-		);
+	// 	const sortedData = [...(userData?.message?.loanApplications?.loanApplications || [])].sort(
+	// 		(a, b) => {
+	// 			if (a[column] < b[column]) return order === 'asc' ? -1 : 1;
+	// 			if (a[column] > b[column]) return order === 'asc' ? 1 : -1;
+	// 			return 0;
+	// 		},
+	// 	);
 
-		setUserData((prevData) => ({
-			...prevData,
-			message: {
-				...prevData.message,
-				loanApplications: {
-					...prevData.message.loanApplications,
-					loanApplications: sortedData,
-				},
-			},
-		}));
-	};
-	console.log(rejectLoanDoc, 'rejectLoanDoc');
+	// 	setUserData((prevData) => ({
+	// 		...prevData,
+	// 		message: {
+	// 			...prevData.message,
+	// 			loanApplications: {
+	// 				...prevData.message.loanApplications,
+	// 				loanApplications: sortedData,
+	// 			},
+	// 		},
+	// 	}));
+	// };
 
 	// const handleSearch = (e) => {
 	//   setSearchQuery(e.target.value);
@@ -266,18 +257,18 @@ const PreApproveApplication = () => {
 	};
 
 	const filteredData = filterData(userData?.message?.loanApplications?.loanApplications || []);
-	const currentItems = filteredData;
+	// const currentItems = filteredData;
 
-	const renderSortIcon = (column) => {
-		if (sortColumn === column) {
-			return sortOrder === 'asc' ? (
-				<i className='fas fa-arrow-up' />
-			) : (
-				<i className='fas fa-arrow-down' />
-			);
-		}
-		return null;
-	};
+	// const renderSortIcon = (column) => {
+	// 	if (sortColumn === column) {
+	// 		return sortOrder === 'asc' ? (
+	// 			<i className='fas fa-arrow-up' />
+	// 		) : (
+	// 			<i className='fas fa-arrow-down' />
+	// 		);
+	// 	}
+	// 	return null;
+	// };
 	const [offcanvasStatus, setOffcanvasStatus] = useState(false);
 	console.log(filteredData, 'filteredData Check New data');
 
@@ -309,45 +300,49 @@ const PreApproveApplication = () => {
 		fetchUserData();
 	};
 
-	const [distributeData, setDistributeData] = useState(null);
-	const [alertMessage, setAlertMessage] = useState('');
-	const [showAlert, setShowAlert] = useState(false);
+	// const [distributeData, setDistributeData] = useState(null);
+	// const [alertMessage, setAlertMessage] = useState('');
+	// const [showAlert, setShowAlert] = useState(false);
 
-	const fetchDistributeData = async () => {
-		try {
-			const response = await fetch(
-				'https://suprafinleaselimitedbe-production.up.railway.app/api/nbfc/distribute-application',
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-						Authorization: `Bearer ${authToken}`,
-					},
-				},
-			);
+	// const fetchDistributeData = async () => {
+	// 	try {
+	// 		const response = await fetch(
+	// 			'https://suprafinleaselimitedbe-production.up.railway.app/api/nbfc/distribute-application',
+	// 			{
+	// 				method: 'POST',
+	// 				headers: {
+	// 					'Content-Type': 'application/json',
+	// 					Authorization: `Bearer ${authToken}`,
+	// 				},
+	// 			},
+	// 		);
 
-			if (!response.ok) {
-				throw new Error('Network response was not ok');
-			}
+	// 		if (!response.ok) {
+	// 			throw new Error('Network response was not ok');
+	// 		}
 
-			const data = await response.json();
-			setDistributeData(data);
+	// 		const data = await response.json();
+	// 		setDistributeData(data);
 
-			if (data && data.length > 0) {
-				window.confirm('Are you sure you send this record?');
-				// setAlertMessage('There are send loans, please check.');
-			} else {
-				setAlertMessage('No Data available.');
-			}
+	// 		if (data && data.length > 0) {
+	// 			window.confirm('Are you sure you send this record?');
+	// 			// setAlertMessage('There are send loans, please check.');
+	// 		} else {
+	// 			setAlertMessage('No Data available.');
+	// 		}
 
-			fetchUserData();
-			setShowAlert(true);
-		} catch (error) {
-			console.error('There was a problem with the fetch operation:', error);
-			setAlertMessage('No Data available.');
-			setShowAlert(true);
-		}
-	};
+	// 		fetchUserData();
+	// 		setShowAlert(true);
+	// 	} catch (error) {
+	// 		console.error('There was a problem with the fetch operation:', error);
+	// 		setAlertMessage('No Data available.');
+	// 		setShowAlert(true);
+	// 	}
+	// };
+
+	// console.log(distributeData, "distributeData");
+	// console.log(alertMessage, "alertMessage");
+	// console.log(showAlert, "showAlert");
 
 	const fetchCustomerAttachment = useCallback(async () => {
 		try {
@@ -386,41 +381,41 @@ const PreApproveApplication = () => {
 	// Function to handle loan approval
 	const handleSubmitApproveLoans = () => {
 		if (isChecked) {
-			// Proceed with approving the loan if checkbox is checked
 			fetchApproveLoanAPI(ApproveLoanId);
 		} else {
-			// Show error or prevent action if checkbox is not checked
 			alert("You must check the box to approve the loan.");
 		}
 	};
-	const isErishLoggedIn = ErishLoginCheck !== 'false' && ErishLoginCheck !== null;
-	const timeoutDuration = 60 * 60 * 1000; // 1 Hour
-	let timeout;
-	useEffect(() => {
-		if (!authToken) {
-			navigate('/auth-pages/login');
-		}
-	}, [authToken, navigate]);
 
-	const logout = () => {
-		localStorage.removeItem('token');
-		navigate('/auth-pages/login');
-	};
-	const resetTimeout = () => {
-		clearTimeout(timeout);
-		timeout = setTimeout(logout, timeoutDuration);
-	};
 
+	// const isErishLoggedIn = ErishLoginCheck !== 'false' && ErishLoginCheck !== null;
 	useEffect(() => {
-		window.addEventListener('mousemove', resetTimeout);
-		window.addEventListener('keypress', resetTimeout);
-		timeout = setTimeout(logout, timeoutDuration);
-		return () => {
-			window.removeEventListener('mousemove', resetTimeout);
-			window.removeEventListener('keypress', resetTimeout);
-			clearTimeout(timeout);
-		};
-	}, []);
+        if (!authToken) navigate('/auth-pages/login');
+    }, [authToken, navigate]);
+
+    const logout = useCallback(() => {
+        localStorage.removeItem('token');
+        navigate('/auth-pages/login');
+    }, [navigate]);
+
+    const resetTimeout = useCallback(() => {
+        clearTimeout(timeout.current);
+        timeout.current = setTimeout(logout, timeoutDuration);
+    }, [logout, timeoutDuration]);
+
+    useEffect(() => {
+        window.addEventListener('mousemove', resetTimeout);
+        window.addEventListener('keypress', resetTimeout);
+
+        timeout.current = setTimeout(logout, timeoutDuration);
+
+        return () => {
+            window.removeEventListener('mousemove', resetTimeout);
+            window.removeEventListener('keypress', resetTimeout);
+            clearTimeout(timeout.current);
+        };
+    }, [resetTimeout, logout, timeoutDuration]);
+
 	return (
 		<PageWrapper>
 			<Page>
@@ -457,7 +452,7 @@ const PreApproveApplication = () => {
 										<td>{index + 1}</td>
 										{/* <td>{item.id}</td> */}
 										{/* <td>{item.cust_id}</td> */}
-                                        <td><Link to={`/loanprofile/${user.id}`}>{user.cust_id}</Link></td>
+                                        <td>{user.cust_id}</td>
 										<td>{user.occupation}</td>
                                         <td>{user.monthly_income}</td>
                                         <td>{user.aadhar_number}</td>
@@ -478,7 +473,7 @@ const PreApproveApplication = () => {
 													<DropdownMenu isAlignmentEnd>
 														<DropdownItem>
 															<Button
-																onClick={() => { setApproveLoanId(user.id); 
+																onClick={() => { setApproveLoanId(user?.id); 
 																	setModalStatus2(true);}
 																	// handleApproveClick(item.id)
 																}>
@@ -513,25 +508,7 @@ const PreApproveApplication = () => {
 						<ModalTitle id='new-todo-modal'>Reject Loan</ModalTitle>
 					</ModalHeader>
 					<ModalBody>
-						<label htmlFor='PanCard' className='form-label'>
-							Document Issue
-						</label>
-
-						<FormGroup id='PanCard'>
-							<select
-								value={rejectLoanDocStatus}
-								onChange={(e) => setRejectLoanDocStatus(e.target.value)}
-								className='selectvalue'>
-								<option value=''>Document Issue</option>
-								<option value='true'>Yes</option>
-								<option value='false'>No</option>
-							</select>
-							{errorMessage.rejectLoanDocStatus && (
-								<div className='text-danger'>
-									{errorMessage.rejectLoanDocStatus}
-								</div>
-							)}
-						</FormGroup><br />
+						
 
 						<Label htmlFor='reason'>Reject Reason*</Label>
 
@@ -539,39 +516,16 @@ const PreApproveApplication = () => {
 							<Input
 								type='text'
 								id='reason'
-								name='reason' // Changed to 'reason'
+								name='reason'
 								placeholder='Reject Reason'
 								autoComplete='off'
-								value={reason} // Changed to 'reason'
+								value={reason}
 								onChange={(e) => setReason(e.target.value)}
 							/>
 							{errorMessage.reason && (
 								<div className='text-danger'>{errorMessage.reason}</div>
 							)}
 						</FormGroup><br />
-{/* {rejectLoanDocStatus === 'true' && (
-  <> */}
-						<Label htmlFor='reason'>Reject Document Id*</Label>
-
-						<FormGroup>
-							<select
-								value={rejectLoanDoc}
-								onChange={(e) => setRejectLoanDoc(e.target.value)}
-								className='selectvalue'>
-								<option value='' disabled>
-									Select Document ID
-								</option>
-								{CustomerAttachData?.message?.loanApplications?.loanApplications?.customer?.cust_attach?.map(
-									(itemname11) => (
-										<option key={itemname11?.id} value={itemname11?.id}>
-											{itemname11?.id} | {itemname11?.file_type}
-										</option>
-									),
-								)}
-							</select>
-						</FormGroup>
-            {/* </>
-)} */}
 						
 
 						<Button
@@ -600,9 +554,9 @@ const PreApproveApplication = () => {
 						className="check-css"
 					/>
 
-					<label> Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+					<p> Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
 
-</label>
+</p>
 </div>
 						
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import Card, { CardBody, CardFooter, CardFooterRight } from '../../components/bootstrap/Card';
@@ -12,25 +12,17 @@ const CreateRoles = () => {
     const navigate = useNavigate();
     const [Name, setName] = useState('');
     const authToken = localStorage.getItem('token');
-    const [errorMessage, setErrorMessage] = useState({
-        name: '',
-    });
-    // const [response, setResponse] = useState(null);
+    const [errorMessage, setErrorMessage] = useState({ name: '' });
+    const timeout = useRef(null);
+    const timeoutDuration = 60 * 60 * 1000; // 1 Hour
 
     const UpdateFormAPI = async () => {
-        const errors = {
-            name: !Name ? 'Please Enter Name' : '',
-        };
-
+        const errors = { name: !Name ? 'Please Enter Name' : '' };
         setErrorMessage(errors);
-
-        if (Object.values(errors).some((error) => error)) {
-            return;
-        }
+        if (Object.values(errors).some((error) => error)) return;
 
         const url = 'https://suprafinleaselimitedbe-production.up.railway.app/api/setting/roles';
         const token = Cookies.get('token');
-        console.log(token, 'token Check');
         const data = { name: Name };
 
         if (!token) {
@@ -48,47 +40,41 @@ const CreateRoles = () => {
                 body: JSON.stringify(data),
             });
 
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-
-            // const json = await response.json();
+            if (!response.ok) throw new Error('Network response was not ok');
             alert('Thank you! Your record has been successfully submitted.');
-            window.location.href = '/roles';
-
-            // setResponse(json);
+            // window.location.href = '/roles';
+            navigate('/roles');
         } catch (error) {
             console.error('There was a problem with the fetch operation:', error);
         }
     };
 
-    const timeoutDuration = 60 * 60 * 1000; // 1 Hour
-  let timeout;
-  useEffect(() => {
-    if (!authToken) {
-      navigate('/auth-pages/login');
-    }
-  }, [authToken, navigate]);
+    useEffect(() => {
+        if (!authToken) navigate('/auth-pages/login');
+    }, [authToken, navigate]);
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    navigate('/auth-pages/login');
-  };
-  const resetTimeout = () => {
-    clearTimeout(timeout);
-    timeout = setTimeout(logout, timeoutDuration);
-  };
+    const logout = useCallback(() => {
+        localStorage.removeItem('token');
+        navigate('/auth-pages/login');
+    }, [navigate]);
 
-  useEffect(() => {
-    window.addEventListener('mousemove', resetTimeout);
-    window.addEventListener('keypress', resetTimeout);
-    timeout = setTimeout(logout, timeoutDuration);
-    return () => {
-      window.removeEventListener('mousemove', resetTimeout);
-      window.removeEventListener('keypress', resetTimeout);
-      clearTimeout(timeout);
-    };
-  }, []);
+    const resetTimeout = useCallback(() => {
+        clearTimeout(timeout.current);
+        timeout.current = setTimeout(logout, timeoutDuration);
+    }, [logout, timeoutDuration]);
+
+    useEffect(() => {
+        window.addEventListener('mousemove', resetTimeout);
+        window.addEventListener('keypress', resetTimeout);
+
+        timeout.current = setTimeout(logout, timeoutDuration);
+
+        return () => {
+            window.removeEventListener('mousemove', resetTimeout);
+            window.removeEventListener('keypress', resetTimeout);
+            clearTimeout(timeout.current);
+        };
+    }, [resetTimeout, logout, timeoutDuration]);
 
     return (
         <PageWrapper>
@@ -96,49 +82,45 @@ const CreateRoles = () => {
                 <div className='row h-100 pb-3'>
                     <div className='col-lg-12 col-md-12'>
                         <Card>
-                            
-                                <div className='row'>
-                                    <h4 className='heading-h4'>Add Role</h4>
-                                    <div className='col-lg-12 col-md-12'>
-                                        <CardBody className='pb-0'>
-                                            <div className='row g-4'>
-                                                <div className='col-12'>
-                                                    <label htmlFor="exampleAC--name" className="form-label">Name</label>
-                                                    <FormGroup id='Name'>
-                                                        <Input
-                                                            type='text'
-                                                            name='name'
-                                                            placeholder='Name'
-                                                            autoComplete='name'
-                                                            value={Name}
-                                                            onChange={(e) =>
-                                                                setName(e.target.value)
-                                                            }
-                                                        />
-                                                    </FormGroup>
-                                                    {errorMessage.name && (
-                                                        <div className='text-danger'>
-                                                            {errorMessage.name}
-                                                        </div>
-                                                    )}
-                                                </div>
+                            <div className='row'>
+                                <h4 className='heading-h4'>Add Role</h4>
+                                <div className='col-lg-12 col-md-12'>
+                                    <CardBody className='pb-0'>
+                                        <div className='row g-4'>
+                                            <div className='col-12'>
+                                                <label htmlFor="exampleAC--name" className="form-label">Name</label>
+                                                <FormGroup id='Name'>
+                                                    <Input
+                                                        type='text'
+                                                        name='name'
+                                                        placeholder='Name'
+                                                        autoComplete='name'
+                                                        value={Name}
+                                                        onChange={(e) => setName(e.target.value)}
+                                                    />
+                                                </FormGroup>
+                                                {errorMessage.name && (
+                                                    <div className='text-danger'>
+                                                        {errorMessage.name}
+                                                    </div>
+                                                )}
                                             </div>
-                                        </CardBody>
-                                        <CardFooter>
-                                            <CardFooterRight>
-                                                <Button
-                                                    type='button'
-                                                    icon='Save'
-                                                    color='info'
-                                                    isOutline
-                                                    onClick={UpdateFormAPI}>
-                                                    Submit
-                                                </Button>
-                                            </CardFooterRight>
-                                        </CardFooter>
-                                    </div>
+                                        </div>
+                                    </CardBody>
+                                    <CardFooter>
+                                        <CardFooterRight>
+                                            <Button
+                                                type='button'
+                                                icon='Save'
+                                                color='info'
+                                                isOutline
+                                                onClick={UpdateFormAPI}>
+                                                Submit
+                                            </Button>
+                                        </CardFooterRight>
+                                    </CardFooter>
                                 </div>
-                            
+                            </div>
                         </Card>
                     </div>
                 </div>

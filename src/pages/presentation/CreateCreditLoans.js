@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import Cookies from 'js-cookie';
@@ -15,22 +15,16 @@ const CreateCreditLoans = () => {
     const navigate = useNavigate();
     const baseUrl = process.env.REACT_APP_BASE_URL;
     const [loanAmount, setLoanAmount] = useState('');
-    const [Name, setName] = useState('');
-    const [aadhar, setAadhar] = useState('');
-    const [pan, setPan] = useState('');
     const [ageStart, setAgeStart] = useState('');
     const [ageEnd, setAgeEnd] = useState('');
     const [minMonthFamilyIncome, setMinMonthFamilyIncome] = useState('');
-    const [loanAmtStart, setLoanAmtStart] = useState('');
-    const [loanAmtEnd, setLoanAmtEnd] = useState('');
     const [errorMessage, setErrorMessage] = useState({});
     const authToken = localStorage.getItem("token");
     const [modalStatus1, setModalStatus1] = useState(false);
-    const [Cibilescore, setCibileScore] = useState('');
-
+    const timeout = useRef(null);
+    const timeoutDuration = 60 * 60 * 1000;
     
 	const [userData, setUserData] = useState(null);
-console.log(setName, "setName");
 const fetchUserData = useCallback(async () => {
     try {
       const response = await fetch(`${baseUrl}/nbfc/customers`, {
@@ -145,7 +139,8 @@ useEffect(() => {
 
             await response.json();
             alert('Thank you! Your record has been successfully submitted.');
-            window.location.href = '/credit-loans';
+            navigate('/credit-loans');
+            // window.location.href = '/credit-loans';
 
         } catch (error) {
             console.error('There was a problem with the fetch operation:', error);
@@ -153,33 +148,34 @@ useEffect(() => {
     };
     // const { setIsOpen } = useTour();
 // console.log(attachData, "attachData 1500")
-const timeoutDuration = 60 * 60 * 1000; // 1 Hour
-  let timeout;
-  useEffect(() => {
-    if (!authToken) {
-      navigate('/auth-pages/login');
-    }
-  }, [authToken, navigate]);
+ 
+useEffect(() => {
+    if (!authToken) navigate('/auth-pages/login');
+}, [authToken, navigate]);
 
-  const logout = () => {
+const logout = useCallback(() => {
     localStorage.removeItem('token');
     navigate('/auth-pages/login');
-  };
-  const resetTimeout = () => {
-    clearTimeout(timeout);
-    timeout = setTimeout(logout, timeoutDuration);
-  };
+}, [navigate]);
 
-  useEffect(() => {
+const resetTimeout = useCallback(() => {
+    clearTimeout(timeout.current);
+    timeout.current = setTimeout(logout, timeoutDuration);
+}, [logout, timeoutDuration]);
+
+useEffect(() => {
     window.addEventListener('mousemove', resetTimeout);
     window.addEventListener('keypress', resetTimeout);
-    timeout = setTimeout(logout, timeoutDuration);
+
+    timeout.current = setTimeout(logout, timeoutDuration);
+
     return () => {
-      window.removeEventListener('mousemove', resetTimeout);
-      window.removeEventListener('keypress', resetTimeout);
-      clearTimeout(timeout);
+        window.removeEventListener('mousemove', resetTimeout);
+        window.removeEventListener('keypress', resetTimeout);
+        clearTimeout(timeout.current);
     };
-  }, []);
+}, [resetTimeout, logout, timeoutDuration]);
+
     return (
         <PageWrapper>
             <Page>

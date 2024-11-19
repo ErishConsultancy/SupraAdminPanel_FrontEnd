@@ -48,6 +48,12 @@ export const dashboardPagesMenu = {
 		path: 'loan-application',
 		icon: 'RecentActors',
 	},
+	GetPayout: {
+		id: 'GetPayout',
+		text: 'Payout',
+		path: 'payout',
+		icon: 'RecentActors',
+	},
 	CreditLoans: {
 		id: 'CreditLoans',
 		text: 'Credit Loans',
@@ -56,7 +62,7 @@ export const dashboardPagesMenu = {
 	},
 	GetLoans: {
 		id: 'GetLoans',
-		text: 'All Loans',
+		text: 'Loan Scheme',
 		path: 'get-loans',
 		icon: 'RecentActors',
 	},

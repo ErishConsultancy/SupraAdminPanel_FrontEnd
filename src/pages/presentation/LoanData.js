@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 
@@ -52,11 +52,11 @@ const LoanData = () => {
 	const [rejectLoanDoc, setRejectLoanDoc] = useState(null);
 	const [rejectLoanDocStatus, setRejectLoanDocStatus] = useState(null);
 	const [CustomerAttachData, setCustomerAttachData] = useState(null);
-	const [selectedUsers, setSelectedUsers] = useState([]);
 	const [isChecked, setIsChecked] = useState(false); // State for checkbox
 
 	const navigate = useNavigate();
-
+	const timeout = useRef(null);
+	const timeoutDuration = 60 * 60 * 1000;
 
 	console.log(rejectLoanId, 'rejectLoanId');
 	const fetchUserData = useCallback(async () => {
@@ -141,8 +141,7 @@ const LoanData = () => {
 				},
 				body: JSON.stringify({
 					id,
-					id,
-					reason: reason,
+					reason,
 					isDocErr: rejectLoanDocStatus,
 					custAttachId: rejectLoanDoc,
 				}),
@@ -314,6 +313,8 @@ const LoanData = () => {
 	const [alertMessage, setAlertMessage] = useState('');
 	const [showAlert, setShowAlert] = useState(false);
 
+	console.log(distributeData, 'distributeData');
+
 	const fetchDistributeData = async () => {
 		try {
 			const response = await fetch(
@@ -350,6 +351,45 @@ const LoanData = () => {
 		}
 	};
 
+	
+
+	const fetchPayoutAPI = async (payloadId) => {
+		const payloadId1 = payloadId?.payloadId;
+console.log(payloadId1, "payloadId1")
+		const data = {
+			application_id: String(payloadId1),
+		};
+		try {
+			const response = await fetch(
+				`https://suprafinleaselimitedbe-production.up.railway.app/api/payout`,
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: `Bearer ${authToken}`,
+					},
+					body: JSON.stringify(data),
+				},
+			);
+	
+			if (!response.ok) {
+				throw new Error('Network response was not ok');
+			}
+			navigate("/payout");
+
+			fetchUserData();
+		} catch (error) {
+			console.error('There was a problem with the fetch operation:', error);
+		}
+	};
+	
+	const handleApproveClick = (payloadId1) => {
+		if (window.confirm('Are you sure you want to Approve this record?')) {
+			fetchPayoutAPI(payloadId1);
+		}
+	};
+	
+
 	const fetchCustomerAttachment = useCallback(async () => {
 		try {
 			const response = await fetch(
@@ -368,7 +408,7 @@ const LoanData = () => {
 			}
 
 			const data = await response.json();
-			console.log(data, "data")
+			console.log(data, 'data');
 			setCustomerAttachData(data);
 		} catch (error) {
 			console.error('There was a problem with the fetch operation:', error);
@@ -391,37 +431,38 @@ const LoanData = () => {
 			fetchApproveLoanAPI(ApproveLoanId);
 		} else {
 			// Show error or prevent action if checkbox is not checked
-			alert("You must check the box to approve the loan.");
+			alert('You must check the box to approve the loan.');
 		}
 	};
 	const isErishLoggedIn = ErishLoginCheck !== 'false' && ErishLoginCheck !== null;
-	const timeoutDuration = 60 * 60 * 1000; // 1 Hour
-	let timeout;
+
 	useEffect(() => {
-		if (!authToken) {
-			navigate('/auth-pages/login');
-		}
+		if (!authToken) navigate('/auth-pages/login');
 	}, [authToken, navigate]);
 
-	const logout = () => {
+	const logout = useCallback(() => {
 		localStorage.removeItem('token');
 		navigate('/auth-pages/login');
-	};
-	const resetTimeout = () => {
-		clearTimeout(timeout);
-		timeout = setTimeout(logout, timeoutDuration);
-	};
+	}, [navigate]);
+
+	const resetTimeout = useCallback(() => {
+		clearTimeout(timeout.current);
+		timeout.current = setTimeout(logout, timeoutDuration);
+	}, [logout, timeoutDuration]);
 
 	useEffect(() => {
 		window.addEventListener('mousemove', resetTimeout);
 		window.addEventListener('keypress', resetTimeout);
-		timeout = setTimeout(logout, timeoutDuration);
+
+		timeout.current = setTimeout(logout, timeoutDuration);
+
 		return () => {
 			window.removeEventListener('mousemove', resetTimeout);
 			window.removeEventListener('keypress', resetTimeout);
-			clearTimeout(timeout);
+			clearTimeout(timeout.current);
 		};
-	}, []);
+	}, [resetTimeout, logout, timeoutDuration]);
+
 	return (
 		<PageWrapper>
 			<Page>
@@ -433,17 +474,17 @@ const LoanData = () => {
 							</CardTitle>
 						</CardLabel>
 						<CardActions>
-							{/* {isErishLoggedIn && ( */}
-      							<Link to='' onClick={fetchDistributeData}>
-      							  <Button color='info'>Distribute Loan Applications</Button>
-      						</Link>
-   						 {/* )} */}
-							<Link to=''>
+							{isErishLoggedIn && (
+								<Link to='' onClick={fetchDistributeData}>
+									<Button color='info'>Distribute Loan Applications</Button>
+								</Link>
+							)}
+							{/* <Link to=''>
 								<Button
 									icon='FilterList'
 									className='filter-icon-2 btn-icon-22'
 									onClick={() => setOffcanvasStatus(true)}></Button>
-							</Link>
+							</Link> */}
 							{showAlert && (
 								<div className=''>
 									<p style={{ textAlign: 'left' }}>{alertMessage}</p>
@@ -497,84 +538,101 @@ const LoanData = () => {
 								</tr>
 							</thead>
 							<tbody>
-								{currentItems?.map((item, index) => (
-									<tr key={item.id}>
-										<td>{index + 1}</td>
-										{/* <td>{item.id}</td> */}
-										{/* <td>{item.cust_id}</td> */}
-										<td>{item.loan_scheme_id}</td>
-										<td>
-											<Link to={`/loanprofile/${item.id}`}>
-												{item?.customer?.fname}
-											</Link>
-										</td>
-										<td>{item?.aadhar_number}</td>
-										<td>{item?.pan_number}</td>
-										<td>{item.loan_amount}</td>
-										<td>{item.monthly_income}</td>
-										<td>{item.occupation}</td>
-										<td>{item.purpose}</td>
-										<td>{item.cibil_score}</td>
-										<td className={getStatusClass(item.status)}>
-											{item.status}
-										</td>
-										{item.status === 'CRE' || item.status === 'REJ' ? (
+								{currentItems?.map((item, index) =>
+									item?.is_pre_approved === false ? (
+										<tr key={item.id}>
+											<td>{index + 1}</td>
+											{/* <td>{item.id}</td> */}
+											{/* <td>{item.cust_id}</td> */}
+											<td>{item.loan_scheme_id}</td>
 											<td>
-												<Dropdown>
-													<DropdownToggle hasIcon={false}>
-														<Button
-															color={themeStatus}
-															icon='MoreHoriz'
-															aria-label='More options'
-														/>
-													</DropdownToggle>
-													<DropdownMenu isAlignmentEnd>
-														<DropdownItem>
-															<Button
-																onClick={() => { setApproveLoanId(item.id); 
-																	setModalStatus2(true);}
-																	// handleApproveClick(item.id)
-																}>
-																Approve
-															</Button>
-														</DropdownItem>
-														<DropdownItem>
-															<Button
-																onClick={() => {
-																	setRejectLoanId(item.id);
-																	setModalStatus1(true);
-																}}>
-																Reject
-															</Button>
-														</DropdownItem>
-													</DropdownMenu>
-												</Dropdown>
+												<Link to={`/loanprofile/${item.id}`}>
+													{item?.customer?.fname}
+												</Link>
 											</td>
-										) : (
-											<td>
-												<Dropdown>
-													<DropdownToggle hasIcon={false}>
-														<Button
-															color={themeStatus}
-															icon='MoreHoriz'
-															aria-label='More options'
-														/>
-													</DropdownToggle>
-													<DropdownMenu isAlignmentEnd>
-														<DropdownItem>
-															<Link
-																to={`../loan-installments/${item.id}`}>
-																<Button>
-																	Check Loan Installments
+											<td>{item?.aadhar_number}</td>
+											<td>{item?.pan_number}</td>
+											<td>{item.loan_amount}</td>
+											<td>{item.monthly_income}</td>
+											<td>{item.occupation}</td>
+											<td>{item.purpose}</td>
+											<td>{item.cibil_score}</td>
+											<td className={getStatusClass(item.status)}>
+												{item.status}
+											</td>
+											{item.status === 'CRE' || item.status === 'REJ' ? (
+												<td>
+													<Dropdown>
+														<DropdownToggle hasIcon={false}>
+															<Button
+																color={themeStatus}
+																icon='MoreHoriz'
+																aria-label='More options'
+															/>
+														</DropdownToggle>
+														<DropdownMenu isAlignmentEnd>
+															<DropdownItem>
+																<Button
+																	onClick={
+																		() => {
+																			setApproveLoanId(
+																				item.id,
+																			);
+																			setModalStatus2(true);
+																		}
+																		// handleApproveClick(item.id)
+																	}>
+																	Approve
 																</Button>
-															</Link>
-														</DropdownItem>
-													</DropdownMenu>
-												</Dropdown>
-											</td>
-										)}
-									</tr>
-								))}
+															</DropdownItem>
+															<DropdownItem>
+																<Button
+																	onClick={() => {
+																		setRejectLoanId(item.id);
+																		setModalStatus1(true);
+																	}}>
+																	Reject
+																</Button>
+															</DropdownItem>
+														</DropdownMenu>
+													</Dropdown>
+												</td>
+											) : (
+												<td>
+													<Dropdown>
+														<DropdownToggle hasIcon={false}>
+															<Button
+																color={themeStatus}
+																icon='MoreHoriz'
+																aria-label='More options'
+															/>
+														</DropdownToggle>
+														<DropdownMenu isAlignmentEnd>
+															<DropdownItem>
+																<Link
+																	to={`../loan-installments/${item.id}`}>
+																	<Button>
+																		Check Loan Installments
+																	</Button>
+																</Link>
+															</DropdownItem>
+															<DropdownItem>
+																<Link to=''>
+																	<Button
+																		onClick={() => {
+																			handleApproveClick({payloadId:item.id})}
+																		}>
+																		Payout
+																	</Button>
+																</Link>
+															</DropdownItem>
+														</DropdownMenu>
+													</Dropdown>
+												</td>
+											)}
+										</tr>
+									) : null,
+								)}
 							</tbody>
 						</table>
 					</CardBody>
@@ -606,7 +664,8 @@ const LoanData = () => {
 									{errorMessage.rejectLoanDocStatus}
 								</div>
 							)}
-						</FormGroup><br />
+						</FormGroup>
+						<br />
 
 						<Label htmlFor='reason'>Reject Reason*</Label>
 
@@ -623,8 +682,9 @@ const LoanData = () => {
 							{errorMessage.reason && (
 								<div className='text-danger'>{errorMessage.reason}</div>
 							)}
-						</FormGroup><br />
-{/* {rejectLoanDocStatus === 'true' && (
+						</FormGroup>
+						<br />
+						{/* {rejectLoanDocStatus === 'true' && (
   <> */}
 						<Label htmlFor='reason'>Reject Document Id*</Label>
 
@@ -645,9 +705,8 @@ const LoanData = () => {
 								)}
 							</select>
 						</FormGroup>
-            {/* </>
+						{/* </>
 )} */}
-						
 
 						<Button
 							type='button'
@@ -666,20 +725,28 @@ const LoanData = () => {
 						<ModalTitle id='new-todo-modal'>Approve Loan</ModalTitle>
 					</ModalHeader>
 					<ModalBody className='Approve-loan-body'>
-					<h2>Are you sure you want to approve this loan?</h2>
-<div className='check-div'>
-						<Checks
-						type="checkbox"
-						checked={isChecked}
-						onChange={handleCheckboxChange}
-						className="check-css"
-					/>
+						<h2>Are you sure you want to approve this loan?</h2>
+						<div className='check-div'>
+							<Checks
+								type='checkbox'
+								checked={isChecked}
+								onChange={handleCheckboxChange}
+								className='check-css'
+							/>
 
-					<label> Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
-
-</label>
-</div>
-						
+							<p>
+								{' '}
+								Lorem Ipsum is simply dummy text of the printing and typesetting
+								industry. Lorem Ipsum has been the industry's standard dummy text
+								ever since the 1500s, when an unknown printer took a galley of type
+								and scrambled it to make a type specimen book. It has survived not
+								only five centuries, but also the leap into electronic typesetting,
+								remaining essentially unchanged. It was popularised in the 1960s
+								with the release of Letraset sheets containing Lorem Ipsum passages,
+								and more recently with desktop publishing software like Aldus
+								PageMaker including versions of Lorem Ipsum.
+							</p>
+						</div>
 
 						<Button
 							type='button'
@@ -689,7 +756,6 @@ const LoanData = () => {
 						</Button>
 					</ModalBody>
 				</Modal>
-
 
 				<OffCanvas
 					id='notificationCanvas'

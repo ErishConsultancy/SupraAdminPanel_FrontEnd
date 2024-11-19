@@ -144,6 +144,7 @@ margin-bottom: 5px;
     padding-bottom: 15px;
     padding: 15px 15px !important;
     border-bottom: 1px solid #e0e0e0;
+    font-weight: 600;
 }
 .loanprofile-table th{
     width: 40%;
@@ -154,6 +155,9 @@ margin-bottom: 5px;
     text-align: right;
 }
 .image-size-1{
+    width: 15% !important;
+}
+.image-size-1 img{
     width: 15% !important;
 }
 .image-size-2{
@@ -292,4 +296,40 @@ margin-bottom: 5px;
 .modal-header{
     border-bottom: 1px solid #ccc;
     margin-bottom: 15px;
+}
+.Not_verified{
+    color: red !important;
+    font-weight: 600;
+}
+.verified{
+    color: green !important;
+    font-weight: 600;
+}
+.link_button{
+    color: #1f2128;
+    padding: 0px !important;
+}
+
+.table_td_style td{
+    background-color: transparent !important;
+    /* color: #fff !important; */
+}
+.table_td_style tr{
+    margin-bottom: 15px !important;
+}
+.black_color_1{
+    color: #000;
+    background-color: #fff;
+}
+.white_color_1{
+    background-color: #008000 !important;
+}
+.white_color_1 td{
+    color: #fff !important;
+}
+.check-div p{
+    display: inline-block;
+    width: 90%;
+    padding-left: 15px;
+    text-align: justify;
 }
