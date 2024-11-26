@@ -56,8 +56,14 @@ export const dashboardPagesMenu = {
 	},
 	CreditLoans: {
 		id: 'CreditLoans',
-		text: 'Credit Loans',
+		text: 'Credit Scheme',
 		path: 'credit-loans',
+		icon: 'RecentActors',
+	},
+	CustomerCredit: {
+		id: 'CustomerCredit',
+		text: 'Customer Credit',
+		path: 'customer-credit',
 		icon: 'RecentActors',
 	},
 	GetLoans: {
@@ -96,6 +102,7 @@ export const dashboardPagesMenu = {
 			icon: 'sticky_note_2',
 			subMenu: null,
 		},
+		
 	} : {}),
 	
 	Roles: {
@@ -137,6 +144,14 @@ export const dashboardPagesMenu = {
 		id: 'SendMessage',
 		text: 'SendMessage',
 		path: 'sensmessage',
+		icon: 'sticky_note_2',
+		subMenu: null,
+		hide: true,
+	},
+	ViewNBFCList: {
+		id: 'ViewNBFCList',
+		text: 'View NBFC List',
+		path: 'view-nbfc-list',
 		icon: 'sticky_note_2',
 		subMenu: null,
 		hide: true,

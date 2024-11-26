@@ -83,7 +83,7 @@ const PreApproveApplication = () => {
 	useEffect(() => {
 		fetchUserData();
 	}, [fetchUserData]);
-	console.log(userData, 'userData 1500');
+	console.log(userData, 'userData 1505');
 
 	const fetchApproveLoanAPI = async (id) => {
 		try {

@@ -86,7 +86,6 @@ const LoanData = () => {
 	useEffect(() => {
 		fetchUserData();
 	}, [fetchUserData]);
-	console.log(userData, 'userData 1500');
 
 	const fetchApproveLoanAPI = async (id) => {
 		try {
@@ -205,28 +204,7 @@ const LoanData = () => {
 			},
 		}));
 	};
-	console.log(rejectLoanDoc, 'rejectLoanDoc');
 
-	// const handleSearch = (e) => {
-	//   setSearchQuery(e.target.value);
-	// };
-
-	// const filterData = (data) => {
-	//   if (!searchQuery) return data;
-	//   return data.filter((item) => {
-	//     return (
-	//       (item.cust_id && item.cust_id.toLowerCase().includes(searchQuery.toLowerCase())) ||
-	//       (item.aadhar_number && item.aadhar_number.toLowerCase().includes(searchQuery.toLowerCase())) ||
-	//       (item.pan_number && item.pan_number.toLowerCase().includes(searchQuery.toLowerCase())) ||
-	//       (item.loan_amount && item.loan_amount.toString().toLowerCase().includes(searchQuery.toLowerCase())) ||
-	//       (item.monthly_income && item.monthly_income.toString().toLowerCase().includes(searchQuery.toLowerCase())) ||
-	//       (item.occupation && item.occupation.toLowerCase().includes(searchQuery.toLowerCase())) ||
-	//       (item.purpose && item.purpose.toLowerCase().includes(searchQuery.toLowerCase())) ||
-	//       (item.cibil_score && item.cibil_score.toString().toLowerCase().includes(searchQuery.toLowerCase())) ||
-	//       (item.status && item.status.toLowerCase().includes(searchQuery.toLowerCase()))
-	//     );
-	//   });
-	// };
 	const [filterCustomerId, setFilterCustomerId] = useState('');
 	const [filterName, setFilterName] = useState('');
 	const [filterAadhar, setFilterAadhar] = useState('');
@@ -282,8 +260,6 @@ const LoanData = () => {
 	console.log(filteredData, 'filteredData Check New data');
 
 	const handleSearchAndClose = () => {
-		// You can perform any additional search/filter logic here if needed
-		// const filteredData = filterData(userData?.message?.loanApplications?.loanApplications || []);
 		setUserData((prevData) => ({
 			...prevData,
 			message: {
@@ -351,11 +327,8 @@ const LoanData = () => {
 		}
 	};
 
-	
-
 	const fetchPayoutAPI = async (payloadId) => {
 		const payloadId1 = payloadId?.payloadId;
-console.log(payloadId1, "payloadId1")
 		const data = {
 			application_id: String(payloadId1),
 		};
@@ -371,24 +344,23 @@ console.log(payloadId1, "payloadId1")
 					body: JSON.stringify(data),
 				},
 			);
-	
+
 			if (!response.ok) {
 				throw new Error('Network response was not ok');
 			}
-			navigate("/payout");
+			navigate('/payout');
 
 			fetchUserData();
 		} catch (error) {
 			console.error('There was a problem with the fetch operation:', error);
 		}
 	};
-	
+
 	const handleApproveClick = (payloadId1) => {
 		if (window.confirm('Are you sure you want to Approve this record?')) {
 			fetchPayoutAPI(payloadId1);
 		}
 	};
-	
 
 	const fetchCustomerAttachment = useCallback(async () => {
 		try {
@@ -416,9 +388,7 @@ console.log(payloadId1, "payloadId1")
 	}, [rejectLoanId]);
 	useEffect(() => {
 		fetchCustomerAttachment();
-	}, [fetchCustomerAttachment]);
-	console.log(rejectLoanId, 'rejectLoanId');
-	console.log(CustomerAttachData, 'setCustomerAttachData');
+	}, []);
 
 	const handleCheckboxChange = (e) => {
 		setIsChecked(e.target.checked);
@@ -462,6 +432,41 @@ console.log(payloadId1, "payloadId1")
 			clearTimeout(timeout.current);
 		};
 	}, [resetTimeout, logout, timeoutDuration]);
+
+	const RefreshCibilScoreAPI = async (MyLoanId, CustId, AssignNBFCId) => {
+		const data = {
+			loan_app: MyLoanId,
+			assigned_nbfc: AssignNBFCId,
+			cust_id: String(CustId),
+		};
+		try {
+			const response = await fetch(
+				`https://suprafinleaselimitedbe-production.up.railway.app/api/credit-score/refresh`,
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: `Bearer ${authToken}`,
+					},
+					body: JSON.stringify(data),
+				},
+			);
+
+			if (!response.ok) {
+				throw new Error('Network response was not ok');
+			}
+
+			fetchUserData();
+		} catch (error) {
+			console.error('There was a problem with the fetch operation:', error);
+		}
+	};
+
+	const handleAssignNBFCClick = (MyLoanId, CustId, AssignNBFCId) => {
+		if (window.confirm('Are you sure you want to Referesh Cibil Score?')) {
+			RefreshCibilScoreAPI(MyLoanId, CustId, AssignNBFCId);
+		}
+	};
 
 	return (
 		<PageWrapper>
@@ -571,6 +576,22 @@ console.log(payloadId1, "payloadId1")
 															/>
 														</DropdownToggle>
 														<DropdownMenu isAlignmentEnd>
+															{item?.cibil_score ? (
+															<></>
+													     	) : (
+																<DropdownItem>
+																	<Button
+																		onClick={() => {
+																			handleAssignNBFCClick(
+																				item.id,
+																				item.cust_id,
+																				item.assigned_nbfc,
+																			);
+																		}}>
+																		Cibil Score
+																	</Button>
+															</DropdownItem>
+															)}
 															<DropdownItem>
 																<Button
 																	onClick={
@@ -609,20 +630,22 @@ console.log(payloadId1, "payloadId1")
 														</DropdownToggle>
 														<DropdownMenu isAlignmentEnd>
 															<DropdownItem>
-																<Link
-																	to={`../loan-installments/${item.id}`}>
-																	<Button>
-																		Check Loan Installments
+																<Link to=''>
+																	<Button
+																		onClick={() => {
+																			handleApproveClick({
+																				payloadId: item.id,
+																			});
+																		}}>
+																		Payout
 																	</Button>
 																</Link>
 															</DropdownItem>
 															<DropdownItem>
-																<Link to=''>
-																	<Button
-																		onClick={() => {
-																			handleApproveClick({payloadId:item.id})}
-																		}>
-																		Payout
+																<Link
+																	to={`../loan-installments/${item.id}`}>
+																	<Button>
+																		Check Loan Installments
 																	</Button>
 																</Link>
 															</DropdownItem>

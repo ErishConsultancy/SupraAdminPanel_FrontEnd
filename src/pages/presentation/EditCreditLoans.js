@@ -39,7 +39,7 @@ const EditCreditLoans = () => {
 
             const data = await response.json();
             setUserData(data);
-            setLoanAmount(data?.message?.credit?.cust_id || '');
+            setLoanAmount(data?.message?.credit?.credit_score || '');
             setAgeStart(data?.message?.credit?.credit_amount || '');
             setAgeEnd(data?.message?.credit?.interest_rate || '');
             setMinMonthFamilyIncome(data?.message?.credit?.tenure_in_months || '');
@@ -73,7 +73,7 @@ const EditCreditLoans = () => {
                 body: JSON.stringify({
 
             id: "",
-            cust_id: loanAmount,
+            credit_score: loanAmount,
             credit_amount: ageStart,
             interest_rate: ageEnd,
             tenure_in_months: minMonthFamilyIncome,
@@ -138,19 +138,20 @@ useEffect(() => {
                                         <div className='row g-4'>
                                             
                                         <div className='col-4'>
-                                                <label htmlFor="CustomerID" className="form-label">Customer ID</label>
-                                                <FormGroup id='CustomerID'>
+                                                <label htmlFor="CreditScore" className="form-label">Credit Score</label>
+                                                <FormGroup id='CreditScore'>
                                                 <Input
                                                         type='text'
-                                                        name='CustomerID'
-                                                        placeholder='Customer ID'
-                                                        autoComplete='AgeStart'
+                                                        name='CreditScore'
+                                                        placeholder='Credit Score'
+                                                        autoComplete='loanAmount'
                                                         value={loanAmount}
                                                         onChange={(e) => setLoanAmount(e.target.value)}
-                                                        disabled
                                                     />
                                                 </FormGroup>
                                             </div>
+
+                                           
                                             
                                            
                                             <div className='col-4'>

@@ -33,6 +33,8 @@ import LoanInstallments from '../pages/presentation/LoanInstallments';
 import PreApproveApplication from '../pages/presentation/PreApproveApplication';
 import PreLoanInstallments from '../pages/presentation/PreLoanInstallments';
 import GetPayout from '../pages/presentation/GetPayout';
+import ViewNBFCList from '../pages/presentation/ViewNBFCList';
+import CustomerCredit from '../pages/presentation/CustomerCredit';
 
 const LANDING = {
 	DASHBOARD: lazy(() => import('../pages/presentation/dashboard/DashboardPage')),
@@ -72,7 +74,8 @@ const LANDING = {
 	PreApproveApplication: lazy(() => import('../pages/presentation/PreApproveApplication')),
 	PreLoanInstallments: lazy(() => import('../pages/presentation/PreLoanInstallments')),
 	GetPayout: lazy(() => import('../pages/presentation/GetPayout')),
-
+	ViewNBFCList: lazy(() => import('../pages/presentation/ViewNBFCList')),
+	CustomerCredit: lazy(() => import('../pages/presentation/CustomerCredit')),
 };
 
 
@@ -240,6 +243,10 @@ const presentation: RouteProps[] = [
 		element: <LANDING.Roles />,
 	},
 	{
+		path: dashboardPagesMenu.CustomerCredit.path,
+		element: <LANDING.CustomerCredit />,
+	},
+	{
 		path: dashboardPagesMenu.GetPayout.path,
 		element: <LANDING.GetPayout />,
 	},
@@ -274,6 +281,10 @@ const presentation: RouteProps[] = [
 	{
 		path: dashboardPagesMenu.CreateRoles.path,
 		element: <LANDING.CreateRoles />,
+	},
+	{
+		path: dashboardPagesMenu.ViewNBFCList.path,
+		element: <LANDING.ViewNBFCList />,
 	},
 	{
 		path: dashboardPagesMenu.Createcreditloan.path,

@@ -125,6 +125,8 @@ console.log(userData, "userData15555")
 		}
 	};
 
+
+
 	const fetchWithdrawLoanAPI = async (id) => {
 		try {
 			const response = await fetch(
@@ -181,6 +183,14 @@ useEffect(() => {
 		clearTimeout(timeout.current);
 	};
 }, [resetTimeout, logout, timeoutDuration]);
+
+const handleViewNBFCList = (nbfcAvailable) => {
+	navigate('/view-nbfc-list', {
+	  state: { nbfcAvailable },
+	});
+  };
+  
+
 	return (
 		<PageWrapper>
 			<Page>
@@ -191,11 +201,13 @@ useEffect(() => {
 								Loan Scheme
 							</CardTitle>
 						</CardLabel>
-						<CardActions>
+						{isErishLoggedIn && (
+						 <CardActions>
 							<Link to='../../create-loans'>
 								<Button color='info'>Create Loan</Button>
 							</Link>
 						</CardActions>
+						)}
 					</CardHeader>
 					<CardBody>
 						<table className='table table-modern table-hover table_td_style'>
@@ -365,13 +377,24 @@ useEffect(() => {
         />
       </DropdownToggle>
       <DropdownMenu isAlignmentEnd>
+	  <DropdownItem>
+    <Button
+      onClick={() => {
+        handleViewNBFCList(JSON.parse(user?.nbfc_available || "[]"));
+      }}
+    >
+      View NBFC
+    </Button>
+</DropdownItem>
+
+
         <DropdownItem>
-		<Link className='link_button' to="">
+		{/* <Link className='link_button' to=""> */}
             <Button onClick={() => { handleApproveClick(user?.id)}}>Approve</Button>
-          </Link>
+          {/* </Link> */}
         </DropdownItem>
         <DropdownItem>
-          <Link className='link_button' to=''>
+          {/* <Link className='link_button' to=''> */}
             <Button
               onClick={() =>
                 handleWithdrawClick(user.id)
@@ -379,7 +402,7 @@ useEffect(() => {
             >
               Withdraw
             </Button>
-          </Link>
+          {/* </Link> */}
         </DropdownItem>
       </DropdownMenu>
     </Dropdown>

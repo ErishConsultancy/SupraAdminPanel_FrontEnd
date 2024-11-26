@@ -149,7 +149,7 @@ useEffect(() => {
 								<tr>
 									<th scope='col'>Sr.</th>
 									{/* <th scope='col'>Cust_ID</th> */}
-									<th scope='col'>cust_id</th>
+									<th scope='col'>Credit Score</th>
 
                                     <th scope='col'>Credit Amount</th>
                                     <th scope='col'>Interest Rate</th>
@@ -162,12 +162,12 @@ useEffect(() => {
 								{userData?.message?.credit?.map((user, index) => (
 									<tr key={user.id}>
 										<td>{index+1}</td>
-										{/* <td>{user.cust_id}</td> */}
-                                        <td> <Link 
+										<td>{user.credit_score}</td>
+                                        {/* <td> <Link 
                                   to={{
 									pathname: `/Pre-loan-instalments/${user.id}`,
 								}}
-                            >{user.cust_id}</Link></td>
+                            >{user.credit_score}</Link></td> */}
 										<td>{user.credit_amount}</td>
 										<td>{user.interest_rate}</td>
                                         <td>{user.tenure_in_months}</td>
