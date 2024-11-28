@@ -124,6 +124,38 @@ useEffect(() => {
       clearTimeout(timeout.current);
   };
 }, [resetTimeout, logout, timeoutDuration]);
+
+
+const fetchApproveDataAPI = async (cust_id) => {
+  try {
+      const response = await fetch(`https://suprafinleaselimitedbe-production.up.railway.app/api/credits/approve-credit`,
+        {
+          cust_id:cust_id
+        },
+        {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${authToken}`
+          }
+      });
+
+      if (!response.ok) {
+          throw new Error('Network response was not ok');
+      }
+
+      // Optionally fetch the updated data
+      fetchUserData();
+  } catch (error) {
+      console.error('There was a problem with the fetch operation:', error);
+  }
+};
+
+const handleApproveClick = (cust_id) => {
+  if (window.confirm("Are you sure you want to Approve this record?")) {
+    fetchApproveDataAPI(cust_id);
+  }
+};
     
 	return (
 		<PageWrapper>
@@ -141,10 +173,10 @@ useEffect(() => {
 							<thead>
 								<tr>
 									<th scope='col'>Sr.</th>
-									{/* <th scope='col'>Cust_ID</th> */}
-									<th scope='col'>Credit Score</th>
+									<th scope='col'>Cust ID</th>
 
                                     <th scope='col'>Credit Amount</th>
+                                    <th scope='col'>Withdraw Amount</th>
                                     <th scope='col'>Interest Rate</th>
                                     <th scope='col'>Tenure Months</th>
 									{/* <th scope='col'>Status</th> */}
@@ -156,12 +188,8 @@ useEffect(() => {
 									<tr key={user.id}>
 										<td>{index+1}</td>
 										<td>{user.cust_id}</td>
-                                        {/* <td> <Link 
-                                  to={{
-									pathname: `/Pre-loan-instalments/${user.id}`,
-								}}
-                            >{user.credit_score}</Link></td> */}
 										<td>{user.credit_amount}</td>
+                    <td>{user.withdraw_amount}</td>
 										<td>{user.interest_rate}</td>
                                         <td>{user.tenure_in_months}</td>
                                         {/* <td className={getStatusClass(user.status)}>{user.status}</td> */}
@@ -187,17 +215,21 @@ useEffect(() => {
                               Installment
                             </Button></Link>
                           </DropdownItem>
+
+                          {user?.nbfc_approved === "PENDING" ? (
                           <DropdownItem>
                             <Link to=""><Button 
                             // onClick={() => {
                             //   setRejectLoanId(item.id);
                             //   setModalStatus1(true);
                             // }}
-							// onClick={() => handleDeleteClick(user.id)}
+							onClick={() => handleApproveClick(user?.cust_id)}
                             >
                               Approve
                             </Button></Link>
                           </DropdownItem>
+                          ):null}
+
                         </DropdownMenu>
                       </Dropdown>
 										</td>
