@@ -423,6 +423,44 @@ console.log(distributeData, "distributeData")
         };
     }, [resetTimeout, logout, timeoutDuration]);
 
+
+
+	const fetchPayoutAPI = async (payloadId) => {
+		const payloadId1 = payloadId?.payloadId;
+		const data = {
+			application_id: String(payloadId1),
+		};
+		try {
+			const response = await fetch(
+				`https://suprafinleaselimitedbe-production.up.railway.app/api/payout`,
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: `Bearer ${authToken}`,
+					},
+					body: JSON.stringify(data),
+				},
+			);
+
+			if (!response.ok) {
+				throw new Error('Network response was not ok');
+			}
+			navigate('/payout');
+
+			fetchUserData();
+		} catch (error) {
+			console.error('There was a problem with the fetch operation:', error);
+		}
+	};
+
+	const handleApproveClick = (payloadId1) => {
+		if (window.confirm('Are you sure you want to Approve this record?')) {
+			fetchPayoutAPI(payloadId1);
+		}
+	};
+	
+
 	return (
 		<PageWrapper>
 			<Page>
@@ -563,8 +601,20 @@ console.log(distributeData, "distributeData")
                             />
                         </DropdownToggle>
                         <DropdownMenu isAlignmentEnd>
+						<DropdownItem>
+																<Link to=''>
+																	<Button
+																		onClick={() => {
+																			handleApproveClick({
+																				payloadId: item?.id,
+																			});
+																		}}>
+																		Payout
+																	</Button>
+																</Link>
+															</DropdownItem>
                             <DropdownItem>
-                                <Link to={`../loan-installments/${item.id}`}>
+                                <Link to={`../loan-installments/${item?.id}`}>
                                     <Button>
                                         Check Loan Installments
                                     </Button>

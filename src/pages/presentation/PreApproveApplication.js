@@ -48,6 +48,8 @@ const PreApproveApplication = () => {
 	const [errorMessage, setErrorMessage] = useState({ reason: '' });
 	const [rejectLoanId, setRejectLoanId] = useState(null);
 	const [ApproveLoanId, setApproveLoanId] = useState(null);
+	const [ApproveCustId, setApproveCustId] = useState(null);
+
 
 	const [CustomerAttachData, setCustomerAttachData] = useState(null);
 	const [isChecked, setIsChecked] = useState(false); // State for checkbox
@@ -85,17 +87,23 @@ const PreApproveApplication = () => {
 	}, [fetchUserData]);
 	console.log(userData, 'userData 1505');
 
-	const fetchApproveLoanAPI = async (id) => {
+	const fetchApproveLoanAPI = async (ApproveLoanId, ApproveCustId) => {
+		console.log(ApproveCustId, "ApproveCustId check");
+		console.log(ApproveLoanId, "ApproveLoanId check");
 		try {
 			const response = await fetch(
-			`https://suprafinleaselimitedbe-production.up.railway.app/api/pre-approve-app/accept/${id}`,
+			`https://suprafinleaselimitedbe-production.up.railway.app/api/pre-approve-app/accept/${ApproveLoanId}`,
+			
 				{
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
 						Authorization: `Bearer ${authToken}`,
 					},
+					body: JSON.stringify({cust_id : ApproveCustId}),
 				},
+				
+				
 			);
 
 			if (!response.ok) {
@@ -379,9 +387,11 @@ const PreApproveApplication = () => {
 	};
 
 	// Function to handle loan approval
-	const handleSubmitApproveLoans = () => {
+	const handleSubmitApproveLoans = ( ApproveLoanId, ApproveCustId ) => {
+		console.log(ApproveCustId, "ApproveCustId check m");
+		console.log(ApproveLoanId, "ApproveLoanId check m");
 		if (isChecked) {
-			fetchApproveLoanAPI(ApproveLoanId);
+			fetchApproveLoanAPI(ApproveLoanId, ApproveCustId);
 		} else {
 			alert("You must check the box to approve the loan.");
 		}
@@ -416,6 +426,44 @@ const PreApproveApplication = () => {
         };
     }, [resetTimeout, logout, timeoutDuration]);
 
+
+	const RefreshCibilScoreAPI = async (MyLoanId, CustId, AssignNBFCId) => {
+		const data = {
+			loan_app: MyLoanId,
+			assigned_nbfc: AssignNBFCId,
+			cust_id: String(CustId),
+			is_pre_approve: true,
+		};
+		try {
+			const response = await fetch(
+				`https://suprafinleaselimitedbe-production.up.railway.app/api/credit-score/refresh`,
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: `Bearer ${authToken}`,
+					},
+					body: JSON.stringify(data),
+				},
+			);
+
+			if (!response.ok) {
+				throw new Error('Network response was not ok');
+			}
+
+			fetchUserData();
+		} catch (error) {
+			console.error('There was a problem with the fetch operation:', error);
+		}
+	};
+
+	const handleAssignNBFCClick = (MyLoanId, CustId, AssignNBFCId) => {
+		if (window.confirm('Are you sure you want to Referesh Cibil Score?')) {
+			RefreshCibilScoreAPI(MyLoanId, CustId, AssignNBFCId);
+		}
+	};
+
+	
 	return (
 		<PageWrapper>
 			<Page>
@@ -471,9 +519,30 @@ const PreApproveApplication = () => {
 														/>
 													</DropdownToggle>
 													<DropdownMenu isAlignmentEnd>
+
+															{user?.cibil_score ? (
+															<></>
+													     	) : (
+																<DropdownItem>
+																	<Button
+																		onClick={() => {
+																			handleAssignNBFCClick(
+																				user.id,
+																				user.cust_id,
+																				user.assigned_nbfc,
+																			);
+																		}}>
+																		Cibil Score
+																	</Button>
+															</DropdownItem>
+															)}
+
+															
+
 														<DropdownItem>
 															<Button
-																onClick={() => { setApproveLoanId(user?.id); 
+																onClick={() => { setApproveLoanId(user?.id);
+																	setApproveCustId(user?.cust_id); 
 																	setModalStatus2(true);}
 																	// handleApproveClick(item.id)
 																}>
@@ -562,7 +631,7 @@ const PreApproveApplication = () => {
 
 						<Button
 							type='button'
-							onClick={() => handleSubmitApproveLoans(ApproveLoanId)}
+							onClick={() => handleSubmitApproveLoans(ApproveLoanId, ApproveCustId)}
 							className='reject-button'>
 							Submit
 						</Button>

@@ -15,7 +15,7 @@ const CreateLoans = () => {
 
     const [LoanId, setLoanId] = useState('');
     const [interestRate, setInterestRate] = useState('');
-    const [passport, setPassport] = useState('');
+    const [passport, setPassport] = useState(false);
     const [aadhar, setAadhar] = useState('');
     const [pan, setPan] = useState('');
 
@@ -370,7 +370,7 @@ useEffect(() => {
                                                     </select>
                                                 </FormGroup>
                                             </div>
-                                            <div className='col-4'>
+                                            {/* <div className='col-4'>
                                                 <label htmlFor="Paasport" className="form-label">Paasport</label>
                                                 <FormGroup id='Paasport'>
                                                     <select
@@ -383,7 +383,7 @@ useEffect(() => {
                                                         <option value='false'>No</option>
                                                     </select>
                                                 </FormGroup>
-                                            </div>
+                                            </div> */}
                                             <div className='col-4'>
                                                 <label htmlFor="ProfilePhoto" className="form-label">Profile Photo</label>
                                                 <FormGroup id='ProfilePhoto'>
