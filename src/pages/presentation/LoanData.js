@@ -386,9 +386,11 @@ const LoanData = () => {
 			console.error('There was a problem with the fetch operation:', error);
 		}
 	}, [rejectLoanId]);
+
 	useEffect(() => {
-		fetchCustomerAttachment();
-	}, []);
+	fetchCustomerAttachment();
+}, [fetchCustomerAttachment]);
+
 
 	const handleCheckboxChange = (e) => {
 		setIsChecked(e.target.checked);
@@ -503,9 +505,9 @@ const LoanData = () => {
 							<thead>
 								<tr>
 									<th scope='col'>Sr.</th>
-									{/* <th scope='col' onClick={() => handleSort('id')}>
+									<th scope='col' onClick={() => handleSort('id')}>
                     ID {renderSortIcon('id')}
-                  </th> */}
+                  </th>
 									{/* <th scope='col' onClick={() => handleSort('cust_id')}>
                     Cust Id {renderSortIcon('cust_id')}
                   </th> */}
@@ -547,7 +549,7 @@ const LoanData = () => {
 									item?.is_pre_approved === false ? (
 										<tr key={item.id}>
 											<td>{index + 1}</td>
-											{/* <td>{item.id}</td> */}
+											<td>{item.id}</td>
 											{/* <td>{item.cust_id}</td> */}
 											<td>{item.loan_scheme_id}</td>
 											<td>
@@ -577,7 +579,7 @@ const LoanData = () => {
 														</DropdownToggle>
 														<DropdownMenu isAlignmentEnd>
 															{item?.cibil_score ? (
-															<></>
+															<p>.</p>
 													     	) : (
 																<DropdownItem>
 																	<Button

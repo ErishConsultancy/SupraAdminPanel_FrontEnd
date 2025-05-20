@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import PageWrapper from '../../layout/PageWrapper/PageWrapper';
 import Page from '../../layout/Page/Page';
 import Card, {
-    CardActions,
 	CardBody,
 	CardHeader,
 	CardLabel,
@@ -66,32 +65,32 @@ const CustomerCredit = () => {
     //     }
     //   };
 
-	  const fetchDeleteAPI = async (id) => {
-        try {
-            const response = await fetch(`https://suprafinleaselimitedbe-production.up.railway.app/api/credits/customer-credits-data`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${authToken}`
-                }
-            });
+	  // const fetchDeleteAPI = async (id) => {
+    //     try {
+    //         const response = await fetch(`https://suprafinleaselimitedbe-production.up.railway.app/api/credits/customer-credits-data`, {
+    //             method: 'DELETE',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //                 'Authorization': `Bearer ${authToken}`
+    //             }
+    //         });
 
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
+    //         if (!response.ok) {
+    //             throw new Error('Network response was not ok');
+    //         }
 
-            // Optionally fetch the updated data
-            fetchUserData();
-        } catch (error) {
-            console.error('There was a problem with the fetch operation:', error);
-        }
-    };
+    //         // Optionally fetch the updated data
+    //         fetchUserData();
+    //     } catch (error) {
+    //         console.error('There was a problem with the fetch operation:', error);
+    //     }
+    // };
 
-    const handleDeleteClick = (id) => {
-        if (window.confirm("Are you sure you want to delete this record?")) {
-            fetchDeleteAPI(id);
-        }
-    };
+    // const handleDeleteClick = (id) => {
+    //     if (window.confirm("Are you sure you want to delete this record?")) {
+    //         fetchDeleteAPI(id);
+    //     }
+    // };
 
 	// const [currentPage, setCurrentPage] = useState(1);
 	// const [perPage, setPerPage] = useState(PER_COUNT['5']);
@@ -130,14 +129,14 @@ const fetchApproveDataAPI = async (cust_id) => {
   try {
       const response = await fetch(`https://suprafinleaselimitedbe-production.up.railway.app/api/credits/approve-credit`,
         {
-          cust_id:cust_id
-        },
-        {
           method: 'POST',
           headers: {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${authToken}`
-          }
+          },
+          body:JSON.stringify({
+            cust_id
+          }),
       });
 
       if (!response.ok) {

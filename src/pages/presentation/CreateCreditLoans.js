@@ -47,7 +47,7 @@ const fetchUserData = useCallback(async () => {
     
 	const [attachData, setAttachData] = useState(null);
     const [selectedUserId, setSelectedUserId] = useState(null);
-console.log(userData, "Check Response")
+// console.log(userData, "Check Response")
 
 const fetchAttachLoanAPI = useCallback(async (userId) => {
     const url = `${baseUrl}/credit/attach/${userId}`;

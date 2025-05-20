@@ -74,6 +74,11 @@ useEffect(() => {
 	};
 }, [resetTimeout, logout, timeoutDuration]);
 
+const formatDateTime = (isoDate) => {
+    const date = new Date(isoDate);
+    return date.toLocaleString(); // Converts to the user's local time format
+};
+
   
 	return (
 		<PageWrapper>
@@ -94,6 +99,8 @@ useEffect(() => {
 									<th scope='col'>Sr.</th>
                                     <th scope='col'>Installment Amount</th>
 									<th scope='col'>Installment Number</th>
+									<th scope='col'>Due Date</th>
+									<th scope='col'>Paid Date</th>
                                     <th scope='col'>Status</th>
 
 								</tr>
@@ -104,8 +111,9 @@ useEffect(() => {
 										<td>{index+1}</td>
 										<td>₹{user.installment_amount}</td>
                                         <td>{user.installment_number}</td>
+										<td>{formatDateTime(user.due_date)}</td>
+										<td>{formatDateTime(user.paid_date)}</td>
                                         <td>{user.status}</td>
-										
 									</tr>
 								))}
 							</tbody>

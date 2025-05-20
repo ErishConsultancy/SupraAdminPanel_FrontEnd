@@ -87,35 +87,57 @@ const PreApproveApplication = () => {
 	}, [fetchUserData]);
 	console.log(userData, 'userData 1505');
 
-	const fetchApproveLoanAPI = async (ApproveLoanId, ApproveCustId) => {
-		console.log(ApproveCustId, "ApproveCustId check");
-		console.log(ApproveLoanId, "ApproveLoanId check");
-		try {
-			const response = await fetch(
-			`https://suprafinleaselimitedbe-production.up.railway.app/api/pre-approve-app/accept/${ApproveLoanId}`,
+	// const fetchApproveLoanAPI = async (ApproveLoanId, ApproveCustId) => {
+	// 	try {
+	// 		const response = await fetch(
+	// 		`https://suprafinleaselimitedbe-production.up.railway.app/api/pre-approve-app/accept/${ApproveLoanId}`,
 			
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-						Authorization: `Bearer ${authToken}`,
-					},
-					body: JSON.stringify({cust_id : ApproveCustId}),
+	// 			{
+	// 				method: 'POST',
+	// 				headers: {
+	// 					'Content-Type': 'application/json',
+	// 					Authorization: `Bearer ${authToken}`,
+	// 				},
+	// 				body: JSON.stringify({cust_id : ApproveCustId}),
+	// 			},
+				
+				
+	// 		);
+
+	// 		if (!response.ok) {
+	// 			throw new Error('Network response was not ok');
+	// 		}
+	// 		setModalStatus2(false);
+
+	// 		fetchUserData();
+	// 	} catch (error) {
+	// 		console.error('There was a problem with the fetch operation:', error);
+	// 	}
+	// };
+
+	const fetchApproveLoanAPI = async (loanId, custId) => {
+	try {
+		const response = await fetch(
+			`https://suprafinleaselimitedbe-production.up.railway.app/api/pre-approve-app/accept/${loanId}`,
+			{
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${authToken}`,
 				},
-				
-				
-			);
-
-			if (!response.ok) {
-				throw new Error('Network response was not ok');
+				body: JSON.stringify({ cust_id: custId }),
 			}
-			setModalStatus2(false);
+		);
 
-			fetchUserData();
-		} catch (error) {
-			console.error('There was a problem with the fetch operation:', error);
+		if (!response.ok) {
+			throw new Error('Network response was not ok');
 		}
-	};
+		setModalStatus2(false);
+		fetchUserData();
+	} catch (error) {
+		console.error('There was a problem with the fetch operation:', error);
+	}
+};
 
 	const fetchRejectLoanAPI = async (id) => {
 		const errors = {
@@ -181,51 +203,7 @@ const PreApproveApplication = () => {
 		}
 	};
 
-	// const handleSort = (column) => {
-	// 	const order = sortOrder === 'asc' ? 'desc' : 'asc';
-	// 	setSortOrder(order);
-	// 	setSortColumn(column);
 
-	// 	const sortedData = [...(userData?.message?.loanApplications?.loanApplications || [])].sort(
-	// 		(a, b) => {
-	// 			if (a[column] < b[column]) return order === 'asc' ? -1 : 1;
-	// 			if (a[column] > b[column]) return order === 'asc' ? 1 : -1;
-	// 			return 0;
-	// 		},
-	// 	);
-
-	// 	setUserData((prevData) => ({
-	// 		...prevData,
-	// 		message: {
-	// 			...prevData.message,
-	// 			loanApplications: {
-	// 				...prevData.message.loanApplications,
-	// 				loanApplications: sortedData,
-	// 			},
-	// 		},
-	// 	}));
-	// };
-
-	// const handleSearch = (e) => {
-	//   setSearchQuery(e.target.value);
-	// };
-
-	// const filterData = (data) => {
-	//   if (!searchQuery) return data;
-	//   return data.filter((item) => {
-	//     return (
-	//       (item.cust_id && item.cust_id.toLowerCase().includes(searchQuery.toLowerCase())) ||
-	//       (item.aadhar_number && item.aadhar_number.toLowerCase().includes(searchQuery.toLowerCase())) ||
-	//       (item.pan_number && item.pan_number.toLowerCase().includes(searchQuery.toLowerCase())) ||
-	//       (item.loan_amount && item.loan_amount.toString().toLowerCase().includes(searchQuery.toLowerCase())) ||
-	//       (item.monthly_income && item.monthly_income.toString().toLowerCase().includes(searchQuery.toLowerCase())) ||
-	//       (item.occupation && item.occupation.toLowerCase().includes(searchQuery.toLowerCase())) ||
-	//       (item.purpose && item.purpose.toLowerCase().includes(searchQuery.toLowerCase())) ||
-	//       (item.cibil_score && item.cibil_score.toString().toLowerCase().includes(searchQuery.toLowerCase())) ||
-	//       (item.status && item.status.toLowerCase().includes(searchQuery.toLowerCase()))
-	//     );
-	//   });
-	// };
 	const [filterCustomerId, setFilterCustomerId] = useState('');
 	const [filterName, setFilterName] = useState('');
 	const [filterAadhar, setFilterAadhar] = useState('');
@@ -308,49 +286,6 @@ const PreApproveApplication = () => {
 		fetchUserData();
 	};
 
-	// const [distributeData, setDistributeData] = useState(null);
-	// const [alertMessage, setAlertMessage] = useState('');
-	// const [showAlert, setShowAlert] = useState(false);
-
-	// const fetchDistributeData = async () => {
-	// 	try {
-	// 		const response = await fetch(
-	// 			'https://suprafinleaselimitedbe-production.up.railway.app/api/nbfc/distribute-application',
-	// 			{
-	// 				method: 'POST',
-	// 				headers: {
-	// 					'Content-Type': 'application/json',
-	// 					Authorization: `Bearer ${authToken}`,
-	// 				},
-	// 			},
-	// 		);
-
-	// 		if (!response.ok) {
-	// 			throw new Error('Network response was not ok');
-	// 		}
-
-	// 		const data = await response.json();
-	// 		setDistributeData(data);
-
-	// 		if (data && data.length > 0) {
-	// 			window.confirm('Are you sure you send this record?');
-	// 			// setAlertMessage('There are send loans, please check.');
-	// 		} else {
-	// 			setAlertMessage('No Data available.');
-	// 		}
-
-	// 		fetchUserData();
-	// 		setShowAlert(true);
-	// 	} catch (error) {
-	// 		console.error('There was a problem with the fetch operation:', error);
-	// 		setAlertMessage('No Data available.');
-	// 		setShowAlert(true);
-	// 	}
-	// };
-
-	// console.log(distributeData, "distributeData");
-	// console.log(alertMessage, "alertMessage");
-	// console.log(showAlert, "showAlert");
 
 	const fetchCustomerAttachment = useCallback(async () => {
 		try {
@@ -387,11 +322,9 @@ const PreApproveApplication = () => {
 	};
 
 	// Function to handle loan approval
-	const handleSubmitApproveLoans = ( ApproveLoanId, ApproveCustId ) => {
-		console.log(ApproveCustId, "ApproveCustId check m");
-		console.log(ApproveLoanId, "ApproveLoanId check m");
+	const handleSubmitApproveLoans = ( loanId, custId) => {
 		if (isChecked) {
-			fetchApproveLoanAPI(ApproveLoanId, ApproveCustId);
+			fetchApproveLoanAPI(loanId, custId);
 		} else {
 			alert("You must check the box to approve the loan.");
 		}
@@ -521,7 +454,7 @@ const PreApproveApplication = () => {
 													<DropdownMenu isAlignmentEnd>
 
 															{user?.cibil_score ? (
-															<></>
+															<p>.</p>
 													     	) : (
 																<DropdownItem>
 																	<Button

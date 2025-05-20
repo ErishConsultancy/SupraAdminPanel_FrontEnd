@@ -35,6 +35,8 @@ const CreateLoans = () => {
     const timeout = useRef(null);
     const timeoutDuration = 60 * 60 * 1000;
     
+    console.log(setPassport, "setPassport");
+    
     useEffect(() => {
         const fetchUserData = async () => {
             try {

@@ -496,9 +496,9 @@ console.log(distributeData, "distributeData")
 							<thead>
 								<tr>
 									<th scope='col'>Sr.</th>
-									{/* <th scope='col' onClick={() => handleSort('id')}>
+									<th scope='col' onClick={() => handleSort('id')}>
                     ID {renderSortIcon('id')}
-                  </th> */}
+                  </th>
 									{/* <th scope='col' onClick={() => handleSort('cust_id')}>
                     Cust Id {renderSortIcon('cust_id')}
                   </th> */}
@@ -540,7 +540,7 @@ console.log(distributeData, "distributeData")
     item?.is_pre_approved === true ? (
         <tr key={item.id}>
             <td>{index + 1}</td>
-            {/* <td>{item.id}</td> */}
+            <td>{item.id}</td>
             {/* <td>{item.cust_id}</td> */}
             <td>{item.loan_scheme_id}</td>
             <td>

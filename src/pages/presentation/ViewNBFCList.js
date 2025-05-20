@@ -1,20 +1,17 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { useLocation, useNavigate } from "react-router-dom";
+import React from 'react';
+import { useLocation } from "react-router-dom";
 import PageWrapper from '../../layout/PageWrapper/PageWrapper';
 import Page from '../../layout/Page/Page';
 import Card, {
-	CardActions,
 	CardBody,
 	CardHeader,
 	CardLabel,
 	CardTitle,
 } from '../../components/bootstrap/Card';
-import Button from '../../components/bootstrap/Button';
 
 const ViewNBFCList = () => {
 	const location = useLocation();
     const nbfcAvailable = location.state?.nbfcAvailable || [];
-	const navigate = useNavigate();
 	
 	
 	return (
@@ -52,8 +49,9 @@ const ViewNBFCList = () => {
 										<td>{index + 1}</td>
 										<td>{nbfc?.id}</td>
                                         <td>{nbfc?.name}</td>
-                                        <td><img src={nbfc.logo} width="80" /></td>
-										
+										<td>
+  <img src={nbfc.logo} alt={`Logo of ${nbfc.name}`} width="80" />
+</td>
 									</tr>
 								))}
 							</tbody>
